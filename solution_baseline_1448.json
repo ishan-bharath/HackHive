@@ -1,0 +1,56 @@
+{
+  "plan_id": "1448",
+  "mode": "baseline",
+  "panels": [
+    {
+      "panel_room": "bedroom_1",
+      "panel_position": [
+        129.693,
+        126.428
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "bedroom_1",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 67.35,
+      "device_order": [
+        "bedroom_1",
+        "kitchen_0",
+        "living_0",
+        "bedroom_0"
+      ],
+      "loop_source_indices": [
+        35,
+        3,
+        1,
+        0,
+        2,
+        35
+      ],
+      "loop_length_m": null,
+      "loop_bends": null,
+      "loop_coords": [
+        [
+          129.69,
+          126.43
+        ],
+        [
+          139.79,
+          158.56
+        ]
+      ],
+      "loop_valid": false,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "panel_count": 1,
+    "devices_total": 4,
+    "total_cable_length_m": null,
+    "total_bends": 0,
+    "all_loops_routed": false,
+    "runtime_s": 0.016
+  }
+}

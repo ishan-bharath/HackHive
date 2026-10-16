@@ -64,8 +64,12 @@ def derive_structures(plan, report, scale):
     areas_m2 = {
         rid: rooms[rid]["geometry"].area * scale * scale for rid in rooms
     }
-    eligible = [rid for rid, r in rooms.items() if r["eligible"]]
-    return rooms, portals, room_graph, areas_m2, eligible
+    unroutable = set(report.get("unroutable_rooms") or [])
+    eligible = [
+        rid for rid, r in rooms.items()
+        if r["eligible"] and rid not in unroutable
+    ]
+    return rooms, portals, room_graph, areas_m2, eligible, unroutable
 
 
 def build_index_and_matrices(report):
@@ -235,19 +239,23 @@ def best_panel_for_tour(cluster, report, index, D):
 # ------------------------------------------------------------------
 
 def find_partition(areas_m2, eligible, room_graph, loop_cost_fn):
-    """Try k = k_min down to 1; return (clusters, k_used, k_min) for the first
-    k whose contiguous partition exists. If even k_min is impossible (e.g. a
-    star-shaped room graph), a single cluster is returned with a flagged
-    capacity violation."""
+    """Try k = k_min, k_min+1 ... (more panels can make a contiguous
+    capacity-feasible split possible), then descend to smaller k as flagged
+    fallbacks. Returns (clusters, k_used, k_min, capacity_relaxed)."""
     k_min, total_area, n_comp = min_panels(areas_m2, eligible, room_graph)
-    for k in range(k_min, 0, -1):
+    attempts = list(range(k_min, k_min + 4)) + list(range(k_min - 1, 0, -1)) + [1]
+    tried = set()
+    for k in attempts:
+        if k in tried or k < 1:
+            continue
+        tried.add(k)
         clusters = grow_partition(areas_m2, eligible, room_graph, k)
         if clusters is None:
             continue
-        if all(cluster_connected_strict(c, room_graph, eligible) for c in clusters):
-            return clusters, k, k_min
-    clusters = [set(eligible)]
-    return clusters, 1, k_min
+        if len(clusters) == k and \
+                all(cluster_connected_strict(c, room_graph, eligible) for c in clusters):
+            return clusters, k, k_min, k < k_min
+    return [set(eligible)], 1, k_min, True
 
 
 def grow_partition(areas_m2, eligible, room_graph, k):
@@ -454,7 +462,9 @@ def summarize(solution):
 # ------------------------------------------------------------------
 
 def baseline_solution(plan, report, scale):
-    rooms, portals, room_graph, areas_m2, eligible = derive_structures(plan, report, scale)
+    rooms, portals, room_graph, areas_m2, eligible, unroutable = derive_structures(
+        plan, report, scale
+    )
     index, D, B = build_index_and_matrices(report)
 
     # Candidate lookup: per room, candidate source indices + positions.
@@ -490,23 +500,28 @@ def baseline_solution(plan, report, scale):
             if sum(areas_m2[r] for r in cluster) > PANEL_AREA_CAP_M2:
                 break
         clusters.append(cluster)
-        for rid in list(unassigned):
-            for cluster in clusters:
-                if sum(areas_m2[r] for r in cluster) + areas_m2[rid] <= PANEL_AREA_CAP_M2 \
-                        and len(cluster) < PANEL_DEVICE_CAP \
-                        and cluster_connected_strict(cluster | {rid}, room_graph, eligible):
-                    cluster.add(rid)
-                    unassigned.discard(rid)
-        if unassigned and all(
-            not any(
-                sum(areas_m2[r] for r in cluster) + areas_m2[rid] <= PANEL_AREA_CAP_M2
+        # Distribute leftovers into clusters they can join contiguously.
+        for rid in sorted(unassigned, key=lambda r: -areas_m2[r]):
+            options = [
+                cluster for cluster in clusters
+                if sum(areas_m2[r] for r in cluster) + areas_m2[rid] <= PANEL_AREA_CAP_M2 + 1e-9
                 and len(cluster) < PANEL_DEVICE_CAP
                 and cluster_connected_strict(cluster | {rid}, room_graph, eligible)
-                for cluster in clusters
-            )
-            for rid in unassigned
-        ):
-            clusters.append(set(unassigned))
+            ]
+            if options:
+                target = min(options, key=lambda c: math.hypot(
+                    sum(centroids[r].x for r in c) / len(c) - centroids[rid].x,
+                    sum(centroids[r].y for r in c) / len(c) - centroids[rid].y))
+                target.add(rid)
+                unassigned.discard(rid)
+        if unassigned:
+            # Last resort: attach each leftover to the nearest cluster even if
+            # the capacity is exceeded (flagged by the validator).
+            for rid in sorted(unassigned, key=lambda r: -areas_m2[r]):
+                target = min(clusters, key=lambda c: math.hypot(
+                    sum(centroids[r].x for r in c) / len(c) - centroids[rid].x,
+                    sum(centroids[r].y for r in c) / len(c) - centroids[rid].y))
+                target.add(rid)
             unassigned.clear()
 
     panels = []
@@ -543,7 +558,7 @@ def baseline_solution(plan, report, scale):
         panels.append(rec)
 
     solution = {"plan_id": report["plan_id"], "mode": "baseline", "panels": panels,
-                "metrics": {}}
+                "metrics": {"unroutable_rooms": sorted(unroutable)}}
     return summarize(solution)
 
 
@@ -552,7 +567,9 @@ def baseline_solution(plan, report, scale):
 # ------------------------------------------------------------------
 
 def optimized_solution(plan, report, scale):
-    rooms, portals, room_graph, areas_m2, eligible = derive_structures(plan, report, scale)
+    rooms, portals, room_graph, areas_m2, eligible, unroutable = derive_structures(
+        plan, report, scale
+    )
     index, D, B = build_index_and_matrices(report)
     k, total_area, n_comp = min_panels(areas_m2, eligible, room_graph)
 
@@ -560,7 +577,7 @@ def optimized_solution(plan, report, scale):
         _, ln = solve_loop(cluster, index, D)
         return ln
 
-    clusters, k_used, k_min = find_partition(
+    clusters, k_used, k_min, capacity_relaxed = find_partition(
         areas_m2, eligible, room_graph, loop_cost_fn
     )
     clusters = boundary_swap_improve(
@@ -582,7 +599,9 @@ def optimized_solution(plan, report, scale):
         panels.append(rec)
 
     solution = {"plan_id": report["plan_id"], "mode": "optimized", "panels": panels,
-                "metrics": {"k_min_theoretical": k_min, "k_used": k_used}}
+                "metrics": {"k_min_theoretical": k_min, "k_used": k_used,
+                            "capacity_relaxed": capacity_relaxed,
+                            "unroutable_rooms": sorted(unroutable)}}
     return summarize(solution)
 
 

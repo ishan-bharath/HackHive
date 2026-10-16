@@ -1,0 +1,145 @@
+{
+  "plan_id": "7607",
+  "mode": "optimized",
+  "panels": [
+    {
+      "panel_room": "living_0",
+      "panel_position": [
+        83.571,
+        149.55
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "bedroom_1",
+        "bedroom_2",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 64.46,
+      "device_order": [
+        "bedroom_2",
+        "living_0",
+        "bedroom_1",
+        "kitchen_0",
+        "bedroom_0"
+      ],
+      "loop_source_indices": [
+        7,
+        4,
+        0,
+        3,
+        1,
+        2,
+        7
+      ],
+      "loop_length_m": 29.244,
+      "loop_bends": 3,
+      "loop_coords": [
+        [
+          83.57,
+          149.55
+        ],
+        [
+          58.4,
+          152.32
+        ],
+        [
+          54.71,
+          156.84
+        ],
+        [
+          33.55,
+          196.62
+        ],
+        [
+          54.71,
+          156.84
+        ],
+        [
+          58.4,
+          152.32
+        ],
+        [
+          79.93,
+          105.94
+        ],
+        [
+          112.77,
+          82.57
+        ],
+        [
+          116.46,
+          78.04
+        ],
+        [
+          150.24,
+          42.6
+        ],
+        [
+          116.46,
+          78.04
+        ],
+        [
+          116.46,
+          82.57
+        ],
+        [
+          159.1,
+          113.34
+        ],
+        [
+          163.63,
+          113.34
+        ],
+        [
+          196.81,
+          98.97
+        ],
+        [
+          163.63,
+          113.34
+        ],
+        [
+          159.1,
+          117.03
+        ],
+        [
+          159.1,
+          139.35
+        ],
+        [
+          163.63,
+          143.04
+        ],
+        [
+          209.44,
+          167.59
+        ],
+        [
+          163.63,
+          143.04
+        ],
+        [
+          159.1,
+          143.04
+        ],
+        [
+          83.57,
+          149.55
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "k_min_theoretical": 1,
+    "k_used": 1,
+    "panel_count": 1,
+    "devices_total": 5,
+    "total_cable_length_m": 29.244,
+    "total_bends": 3,
+    "all_loops_routed": true,
+    "runtime_s": 0.032
+  }
+}

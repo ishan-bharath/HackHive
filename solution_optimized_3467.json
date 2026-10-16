@@ -1,0 +1,200 @@
+{
+  "plan_id": "3467",
+  "mode": "optimized",
+  "panels": [
+    {
+      "panel_room": "bedroom_0",
+      "panel_position": [
+        145.226,
+        140.591
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "bedroom_1",
+        "bedroom_2",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 123.73,
+      "device_order": [
+        "kitchen_0",
+        "living_0",
+        "bedroom_2",
+        "bedroom_1",
+        "bedroom_0"
+      ],
+      "loop_source_indices": [
+        30,
+        1,
+        0,
+        4,
+        3,
+        2,
+        30
+      ],
+      "loop_length_m": 52.086,
+      "loop_bends": 4,
+      "loop_coords": [
+        [
+          145.23,
+          140.59
+        ],
+        [
+          145.69,
+          139.24
+        ],
+        [
+          148.18,
+          135.85
+        ],
+        [
+          180.37,
+          135.85
+        ],
+        [
+          179.75,
+          171.65
+        ],
+        [
+          179.75,
+          173.34
+        ],
+        [
+          178.5,
+          206.73
+        ],
+        [
+          179.75,
+          173.34
+        ],
+        [
+          179.75,
+          171.65
+        ],
+        [
+          223.77,
+          82.53
+        ],
+        [
+          193.92,
+          114.61
+        ],
+        [
+          77.81,
+          121.21
+        ],
+        [
+          74.42,
+          121.21
+        ],
+        [
+          35.01,
+          95.77
+        ],
+        [
+          74.42,
+          121.21
+        ],
+        [
+          77.81,
+          123.7
+        ],
+        [
+          84.41,
+          135.85
+        ],
+        [
+          84.41,
+          139.24
+        ],
+        [
+          77.99,
+          147.87
+        ],
+        [
+          34.54,
+          184.2
+        ],
+        [
+          77.99,
+          147.87
+        ],
+        [
+          84.41,
+          139.24
+        ],
+        [
+          86.91,
+          135.85
+        ],
+        [
+          145.69,
+          135.85
+        ],
+        [
+          145.69,
+          139.24
+        ],
+        [
+          125.54,
+          179.27
+        ],
+        [
+          145.23,
+          140.59
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 23.73
+    },
+    {
+      "panel_room": "storage_0",
+      "panel_position": [
+        161.826,
+        152.151
+      ],
+      "assigned_rooms": [
+        "storage_0"
+      ],
+      "assigned_area_m2": 1.43,
+      "device_order": [
+        "storage_0"
+      ],
+      "loop_source_indices": [
+        53,
+        5,
+        53
+      ],
+      "loop_length_m": 1.066,
+      "loop_bends": 0,
+      "loop_coords": [
+        [
+          161.83,
+          152.15
+        ],
+        [
+          168.03,
+          146.63
+        ],
+        [
+          161.83,
+          152.15
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "k_min_theoretical": 2,
+    "k_used": 2,
+    "capacity_relaxed": false,
+    "unroutable_rooms": [],
+    "panel_count": 2,
+    "devices_total": 6,
+    "total_cable_length_m": 53.152,
+    "total_bends": 4,
+    "all_loops_routed": true,
+    "runtime_s": 0.016
+  }
+}

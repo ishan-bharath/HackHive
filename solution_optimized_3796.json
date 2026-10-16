@@ -1,0 +1,126 @@
+{
+  "plan_id": "3796",
+  "mode": "optimized",
+  "panels": [
+    {
+      "panel_room": "living_0",
+      "panel_position": [
+        116.965,
+        137.955
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "bedroom_1",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 62.42,
+      "device_order": [
+        "bedroom_0",
+        "living_0",
+        "kitchen_0",
+        "bedroom_1"
+      ],
+      "loop_source_indices": [
+        4,
+        2,
+        0,
+        1,
+        3,
+        4
+      ],
+      "loop_length_m": 23.669,
+      "loop_bends": 2,
+      "loop_coords": [
+        [
+          116.97,
+          137.96
+        ],
+        [
+          125.21,
+          140.33
+        ],
+        [
+          125.21,
+          143.94
+        ],
+        [
+          96.56,
+          177.34
+        ],
+        [
+          125.21,
+          143.94
+        ],
+        [
+          128.38,
+          140.33
+        ],
+        [
+          191.02,
+          96.92
+        ],
+        [
+          156.36,
+          83.18
+        ],
+        [
+          156.36,
+          81.37
+        ],
+        [
+          154.47,
+          56.55
+        ],
+        [
+          153.19,
+          81.37
+        ],
+        [
+          153.19,
+          83.18
+        ],
+        [
+          129.03,
+          120.18
+        ],
+        [
+          89.34,
+          129.87
+        ],
+        [
+          85.73,
+          129.87
+        ],
+        [
+          48.88,
+          120.18
+        ],
+        [
+          85.73,
+          129.87
+        ],
+        [
+          89.34,
+          129.87
+        ],
+        [
+          116.97,
+          137.96
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "k_min_theoretical": 1,
+    "k_used": 1,
+    "panel_count": 1,
+    "devices_total": 4,
+    "total_cable_length_m": 23.669,
+    "total_bends": 2,
+    "all_loops_routed": true,
+    "runtime_s": 0.016
+  }
+}

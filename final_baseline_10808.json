@@ -1,0 +1,90 @@
+{
+  "plan_id": "10808",
+  "mode": "baseline",
+  "scale_m_per_raw": 0.041671444954128445,
+  "solution": {
+    "plan_id": "10808",
+    "mode": "baseline",
+    "panels": [
+      {
+        "panel_room": "kitchen_0",
+        "panel_position": [
+          155.597,
+          169.804
+        ],
+        "assigned_rooms": [
+          "bedroom_0",
+          "bedroom_1",
+          "kitchen_0",
+          "living_0"
+        ],
+        "assigned_area_m2": 61.05,
+        "device_order": [
+          "kitchen_0",
+          "living_0",
+          "bedroom_1",
+          "bedroom_0"
+        ],
+        "loop_source_indices": [
+          20,
+          1,
+          0,
+          3,
+          2,
+          20
+        ],
+        "loop_length_m": null,
+        "loop_bends": null,
+        "loop_coords": [
+          [
+            155.6,
+            169.8
+          ],
+          [
+            136.24,
+            199.41
+          ]
+        ],
+        "loop_valid": false,
+        "capacity_violation_m2": 0.0
+      }
+    ],
+    "metrics": {
+      "panel_count": 1,
+      "devices_total": 4,
+      "total_cable_length_m": null,
+      "total_bends": 0,
+      "all_loops_routed": false,
+      "runtime_s": 0.0
+    }
+  },
+  "validation": {
+    "checks": {
+      "assignment_complete": true,
+      "capacity": true,
+      "contiguity": false,
+      "closed_loops": false,
+      "physical_routes": true,
+      "legal_transitions": true
+    },
+    "violations": [
+      "panel 0 territory not contiguous",
+      "panel 0 loop is not closed"
+    ],
+    "all_valid": false,
+    "physics": {
+      "nfpa72_classX_pinch_points": [],
+      "nec_bend_violations": [],
+      "voltage_drop_24v": [
+        {
+          "panel": 0,
+          "loop_length_m": 1.474,
+          "loop_resistance_ohm": 0.031,
+          "current_a": 0.018,
+          "voltage_drop_v": 0.0006,
+          "within_limit": true
+        }
+      ]
+    }
+  }
+}

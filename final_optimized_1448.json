@@ -1,0 +1,128 @@
+{
+  "plan_id": "1448",
+  "mode": "optimized",
+  "scale_m_per_raw": 0.05638494318181818,
+  "solution": {
+    "plan_id": "1448",
+    "mode": "optimized",
+    "panels": [
+      {
+        "panel_room": "living_0",
+        "panel_position": [
+          93.191,
+          110.869
+        ],
+        "assigned_rooms": [
+          "bedroom_0",
+          "bedroom_1",
+          "kitchen_0",
+          "living_0"
+        ],
+        "assigned_area_m2": 67.35,
+        "device_order": [
+          "bedroom_0",
+          "bedroom_1",
+          "kitchen_0"
+        ],
+        "loop_source_indices": [
+          0,
+          2,
+          3,
+          1,
+          0
+        ],
+        "loop_length_m": null,
+        "loop_bends": null,
+        "loop_coords": [
+          [
+            93.19,
+            110.87
+          ],
+          [
+            185.83,
+            112.05
+          ],
+          [
+            189.12,
+            112.05
+          ],
+          [
+            222.29,
+            92.09
+          ],
+          [
+            189.12,
+            112.05
+          ],
+          [
+            185.83,
+            112.05
+          ],
+          [
+            122.29,
+            121.01
+          ],
+          [
+            122.29,
+            124.3
+          ],
+          [
+            139.79,
+            158.56
+          ]
+        ],
+        "loop_valid": false,
+        "capacity_violation_m2": 0.0
+      }
+    ],
+    "metrics": {
+      "k_min_theoretical": 1,
+      "k_used": 1,
+      "panel_count": 1,
+      "devices_total": 4,
+      "total_cable_length_m": null,
+      "total_bends": 0,
+      "all_loops_routed": false,
+      "runtime_s": 0.015
+    }
+  },
+  "validation": {
+    "checks": {
+      "assignment_complete": true,
+      "capacity": true,
+      "contiguity": true,
+      "closed_loops": false,
+      "physical_routes": true,
+      "legal_transitions": true
+    },
+    "violations": [
+      "panel 0 loop is not closed",
+      "panel 0 device visitation mismatch: ['bedroom_0', 'bedroom_1', 'kitchen_0'] != ['bedroom_0', 'bedroom_1', 'kitchen_0', 'living_0']"
+    ],
+    "all_valid": false,
+    "physics": {
+      "nfpa72_classX_pinch_points": [
+        {
+          "panel": 0,
+          "room_pair": [
+            "bedroom_0",
+            "living_0"
+          ],
+          "uses": 2,
+          "type": "avoidable"
+        }
+      ],
+      "nec_bend_violations": [],
+      "voltage_drop_24v": [
+        {
+          "panel": 0,
+          "loop_length_m": 15.933,
+          "loop_resistance_ohm": 0.335,
+          "current_a": 0.016,
+          "voltage_drop_v": 0.0054,
+          "within_limit": true
+        }
+      ]
+    }
+  }
+}

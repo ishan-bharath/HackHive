@@ -25,7 +25,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
-from shapely.ops import unary_union
+from shapely.ops import nearest_points, unary_union
 
 import common
 
@@ -99,27 +99,52 @@ def count_bends(coords):
 # ------------------------------------------------------------------
 
 def calibrate(plan):
+    """Primary scale: door-width calibration (door clear width ~0.85 m is a
+    reliable physical constant; ResPlan area metadata is unreliable -
+    5,458/17,000 plans have bad net_area). Fallback: area-based scale.
+    Both are reported for cross-checking."""
     inner = largest(plan.get("inner"))
     reported = plan.get("area") or plan.get("net_area")
-    if inner is None or not reported:
-        raise ValueError("Cannot calibrate: missing inner geometry or area metadata.")
+    if inner is None:
+        raise ValueError("Cannot calibrate: missing inner geometry.")
 
-    scale = math.sqrt(float(reported) / inner.area)
+    area_scale = math.sqrt(float(reported) / inner.area) if reported else None
 
-    door_widths_m = []
+    door_widths_raw = []
     for d in parts(plan.get("door")):
         cs = list(d.minimum_rotated_rectangle.exterior.coords)
         e1 = math.dist(cs[0], cs[1])
         e2 = math.dist(cs[1], cs[2])
-        door_widths_m.append(max(e1, e2) * scale)
-    med_door = float(np.median(door_widths_m)) if door_widths_m else None
+        door_widths_raw.append(max(e1, e2))
+    med_door_raw = float(np.median(door_widths_raw)) if door_widths_raw else None
+
+    if med_door_raw:
+        door_scale = common.NOMINAL_DOOR_WIDTH_M / med_door_raw
+    else:
+        door_scale = None
+    area_door_check = (
+        med_door_raw * area_scale if (med_door_raw and area_scale) else None
+    )
+
+    if door_scale is not None:
+        scale, method = door_scale, "door_width"
+    elif area_scale:
+        scale, method = area_scale, "reported_area"
+    else:
+        raise ValueError("Cannot calibrate: no doors and no area metadata.")
 
     return {
         "scale_m_per_raw": scale,
-        "reported_area_m2": float(reported),
+        "method": method,
+        "reported_area_m2": float(reported) if reported else None,
         "inner_area_raw": inner.area,
-        "median_door_width_m": med_door,
-        "door_width_plausible": med_door is not None and 0.6 <= med_door <= 1.2,
+        "area_based_scale": area_scale,
+        "door_based_scale": door_scale,
+        "median_door_width_m": med_door_raw * scale if med_door_raw else None,
+        "area_implied_door_width_m": area_door_check,
+        "area_door_width_plausible": (
+            area_door_check is not None and 0.6 <= area_door_check <= 1.2
+        ),
         "wall_depth_m": (plan.get("wall_depth") or 0.0) * scale,
     }
 
@@ -197,36 +222,55 @@ def _shared_boundary(ga, gb, eps_raw):
     return lines
 
 
+def _door_opens_between(center, cross, ga, gb, wall_depth_raw):
+    """A door connects two rooms only if they lie on OPPOSITE sides of the
+    door within a short crossing distance (guards against doors that merely
+    come close to both polygons at a corner junction)."""
+    c = Point(center)
+    for mult in (0.5, 1.0, 1.5, 2.0, 3.0):
+        d = wall_depth_raw * mult
+        pa = Point(center[0] + cross[0] * d, center[1] + cross[1] * d)
+        pb = Point(center[0] - cross[0] * d, center[1] - cross[1] * d)
+        if ga.covers(pa) and gb.covers(pb):
+            return True
+        pa2 = Point(center[0] - cross[0] * d, center[1] - cross[1] * d)
+        pb2 = Point(center[0] + cross[0] * d, center[1] + cross[1] * d)
+        if ga.covers(pa2) and gb.covers(pb2):
+            return True
+    return False
+
+
 def find_portals(plan, rooms, scale):
     """Geometry-first portal detection.
 
     Door portals: a door polygon associated with both rooms (room polygons are
     separated by wall thickness, so association is by proximity, not contact).
-    Open-passage portals: for connected pairs with no door, wall-free spans of
-    the line intersection of the room polygons are the opening.
+    Open-passage portals: wall-free spans of the line intersection of the room
+    polygons.
+
+    Sources: graph edges of candidate types, PLUS every geometrically touching
+    or wall-adjacent room pair - the stored graph misses edges in some plans.
     """
     walls_union = unary_union(parts(plan.get("wall"))) if parts(plan.get("wall")) else None
     door_polys = parts(plan.get("door"))
     door_tol = 0.30 / scale
     min_width_raw = 0.6 / scale
+    wall_depth_raw = plan.get("wall_depth") or 0.0
+    pair_reach = max(1.5 * wall_depth_raw, door_tol)
 
     portals = []
-    seen = set()
+    seen_pairs = set()
 
-    for a, b, attrs in plan["graph"].edges(data=True):
-        if a not in rooms or b not in rooms:
-            continue
-        if attrs.get("type") not in CANDIDATE_EDGE_TYPES:
-            continue
+    def portals_for_pair(a, b, edge_type):
         key = tuple(sorted((a, b)))
-        if key in seen:
-            continue
-
+        if key in seen_pairs:
+            return
         ga, gb = rooms[a]["geometry"], rooms[b]["geometry"]
+        if ga.distance(gb) > pair_reach:
+            return
         found_for_pair = False
-
-        # --- Door-leaf portals (dedupe overlapping door polygons) ---
         doors_here = []
+
         for d in door_polys:
             if d.distance(ga) >= door_tol or d.distance(gb) >= door_tol:
                 continue
@@ -241,6 +285,9 @@ def find_portals(plan, rooms, scale):
             doors_here.append((d, (c.x, c.y), (short_ax, long_ax, width_m)))
 
         for d, center, (short_ax, long_ax, width_m) in doors_here:
+            if not _door_opens_between(center, unit(short_ax), ga, gb,
+                                       wall_depth_raw):
+                continue
             portals.append({
                 "rooms": (a, b),
                 "polygon": d,
@@ -249,15 +296,14 @@ def find_portals(plan, rooms, scale):
                 "along_axis": unit(long_ax),
                 "width_m": width_m,
                 "kind": "door",
-                "edge_type": attrs.get("type"),
+                "edge_type": edge_type,
             })
             found_for_pair = True
 
         if found_for_pair:
-            seen.add(key)
-            continue
+            seen_pairs.add(key)
+            return
 
-        # --- Open-passage portals (wall-free spans of the shared line) ---
         boundary_lines = _shared_boundary(ga, gb, 0.05 / scale)
         for bl in boundary_lines:
             if walls_union is None:
@@ -285,38 +331,76 @@ def find_portals(plan, rooms, scale):
                     "along_axis": along,
                     "width_m": span.length * scale,
                     "kind": "opening",
-                    "edge_type": attrs.get("type"),
+                    "edge_type": edge_type,
                 })
-                seen.add(key)
+                seen_pairs.add(key)
+
+    # Pass 1: graph edges of candidate types.
+    for a, b, attrs in plan["graph"].edges(data=True):
+        if a not in rooms or b not in rooms:
+            continue
+        if attrs.get("type") not in CANDIDATE_EDGE_TYPES:
+            continue
+        portals_for_pair(a, b, attrs.get("type"))
+
+    # Pass 2: geometrically adjacent pairs (catches missing graph edges).
+    ids = sorted(rooms)
+    for i, a in enumerate(ids):
+        for b in ids[i + 1:]:
+            portals_for_pair(a, b, "geometric")
 
     return portals
 
 
+def _ensure_inside(pt, geometry):
+    """Return a point guaranteed inside the geometry: pull toward the
+    representative point until covered."""
+    if geometry.covers(Point(pt)):
+        return pt
+    rep = geometry.representative_point()
+    for t in (0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0):
+        q = (pt[0] + (rep.x - pt[0]) * t, pt[1] + (rep.y - pt[1]) * t)
+        if geometry.covers(Point(q)):
+            return q
+    return (rep.x, rep.y)
+
+
 def portal_pins(portal, room_id, geometry, scale, wall_depth_raw):
     """Two enter/exit pin points for one side of a portal, offset +/- 8 cm
-    along the opening axis so a dead-end room loop stays a simple polygon."""
+    along the opening axis so a dead-end room loop stays a simple polygon.
+
+    Pin placement: probe along the crossing direction at increasing depths
+    until inside the room; fall back to the nearest boundary point nudged
+    toward the room interior. Both pins are guaranteed inside the room."""
+    from shapely.ops import nearest_points
+
     cx, cy = portal["center"]
     ax, ay = portal["along_axis"]
     off = PORTAL_OFFSET_M / scale
 
-    # Orient the crossing direction so it points into this room.
-    cand = [portal["cross_axis"], (-portal["cross_axis"][0], -portal["cross_axis"][1])]
-    into = None
-    for direction in cand:
-        if geometry.covers(Point(cx + direction[0] * wall_depth_raw * 0.75,
-                                 cy + direction[1] * wall_depth_raw * 0.75)):
-            into = direction
+    cross = portal["cross_axis"]
+    base = None
+    for direction in (cross, (-cross[0], -cross[1])):
+        for mult in (0.25, 0.5, 0.75, 1.0, 1.5, 2.5, 4.0):
+            p = (cx + direction[0] * wall_depth_raw * mult,
+                 cy + direction[1] * wall_depth_raw * mult)
+            if geometry.covers(Point(p)):
+                base = p
+                break
+        if base:
             break
-    if into is None:
+    if base is None:
+        ngeom, _ = nearest_points(geometry, Point(cx, cy))
         rep = geometry.representative_point()
-        into = unit((rep.x - cx, rep.y - cy))
+        into = unit((rep.x - ngeom.x, rep.y - ngeom.y))
+        nudge = max(0.1 * wall_depth_raw, 0.05 / scale)
+        base = (ngeom.x + into[0] * nudge, ngeom.y + into[1] * nudge)
+        if not geometry.covers(Point(base)):
+            base = (ngeom.x, ngeom.y)
 
-    depth = wall_depth_raw * 0.75
-    base = (cx + into[0] * depth, cy + into[1] * depth)
-    return {
-        1: (base[0] + ax * off, base[1] + ay * off),
-        2: (base[0] - ax * off, base[1] - ay * off),
-    }
+    pin1 = _ensure_inside((base[0] + ax * off, base[1] + ay * off), geometry)
+    pin2 = _ensure_inside((base[0] - ax * off, base[1] - ay * off), geometry)
+    return {1: pin1, 2: pin2}
 
 
 # ------------------------------------------------------------------
@@ -331,8 +415,10 @@ def segment_valid(seg, room_geom, walls_union, portal_union_local, eps_raw):
     if not room_geom.buffer(eps_raw).covers(seg):
         return False
     if walls_union is not None:
-        bad = seg.intersection(walls_union).difference(portal_union_local)
-        if bad.length > 1e-9:
+        bad = seg.intersection(walls_union)
+        if portal_union_local is not None:
+            bad = bad.difference(portal_union_local)
+        if bad is not None and not bad.is_empty and bad.length > 1e-9:
             return False
     return True
 
@@ -340,22 +426,31 @@ def segment_valid(seg, room_geom, walls_union, portal_union_local, eps_raw):
 def build_local_graph(room, portals_here, ring, inset, scale, candidate_points,
                       walls_union):
     """Nodes: device point, portal pins, ring vertices, panel candidates.
-    Edges validated against the room interior and wall geometry."""
+    Edges must stay inside the room's open floor (room minus walls) plus the
+    room's own portal openings - wall bands are excluded, so a segment can
+    never cut through a wall or slip into a neighbouring room."""
     gid = room["id"]
     g = nx.Graph()
-    eps_raw = 0.05 / scale
 
+    free_area = room["geometry"].difference(walls_union) if walls_union is not None \
+        else room["geometry"]
     if portals_here:
-        portal_union_local = unary_union(
-            [p["polygon"] for p in portals_here.values()]
-        )
-    else:
-        portal_union_local = None
+        free_area = unary_union([free_area] + [p["polygon"] for p in portals_here.values()])
+
+    # Device point must lie in the open floor.
+    dev_pos = (room["device_point"].x, room["device_point"].y)
+    if not free_area.covers(Point(dev_pos)):
+        free_geom = room["geometry"].difference(walls_union) if walls_union is not None \
+            else room["geometry"]
+        if not free_geom.is_empty:
+            near = nearest_points(free_geom, Point(dev_pos))[0]
+            dev_pos = (near.x, near.y)
+    room = dict(room, device_point=Point(dev_pos))
 
     nodes = {}
     dev = ("dev", gid)
-    nodes[dev] = (room["device_point"].x, room["device_point"].y)
-    g.add_node(dev, pos=nodes[dev], kind="device")
+    nodes[dev] = dev_pos
+    g.add_node(dev, pos=dev_pos, kind="device")
 
     for key, portal in portals_here.items():
         for pin_idx, pos in portal["pins"][gid].items():
@@ -377,7 +472,7 @@ def build_local_graph(room, portals_here, ring, inset, scale, candidate_points,
     names = list(nodes)
     for u, v in combinations(names, 2):
         seg = LineString([nodes[u], nodes[v]])
-        if segment_valid(seg, room["geometry"], walls_union, portal_union_local, eps_raw):
+        if seg.length < 1e-9 or free_area.covers(seg):
             g.add_edge(u, v, weight=seg.length * scale)
 
     return g, nodes
@@ -404,6 +499,14 @@ def build_global_graph(plan, rooms, portals, scale):
     for rid, room in rooms.items():
         inset, ring = raceway_ring(room, scale, walls_union)
         cands_here = panel_candidates(rid, inset, scale)
+        if not cands_here:
+            free = room["geometry"].difference(walls_union) if walls_union is not None \
+                else room["geometry"]
+            if free.is_empty:
+                free = room["geometry"]
+            rep = largest(free) or free
+            rep = rep.representative_point()
+            cands_here = [(rid, (rep.x, rep.y))]
         local, nodes = build_local_graph(
             room, portals_by_room.get(rid, {}), ring, inset, scale,
             [pos for _, pos in cands_here], walls_union,
@@ -412,15 +515,18 @@ def build_global_graph(plan, rooms, portals, scale):
             "inset": inset, "local": local, "nodes": nodes,
             "candidates": cands_here,
         }
+        rooms[rid]["device_point"] = Point(nodes[("dev", rid)])
         global_graph.add_nodes_from(local.nodes(data=True))
         global_graph.add_edges_from(local.edges(data=True))
 
     # Portal crossing edges: every pin pair across the opening. The part of
-    # the crossing that overlaps walls must lie inside the opening.
+    # the crossing that overlaps walls must lie inside the opening (with a
+    # small tolerance for dataset door/wall misalignment).
+    crossing_tol = 0.15 / scale
     for portal in portals:
         a, b = portal["rooms"]
         pa, pb = portal["pins"][a], portal["pins"][b]
-        opening = portal["polygon"].buffer(eps_raw)
+        opening = portal["polygon"].buffer(crossing_tol)
         for i in (1, 2):
             for j in (1, 2):
                 na = (f"pin_{portal['id']}_{i}", a)
@@ -460,6 +566,11 @@ def panel_candidates(room, inset, scale):
         carried = (carried + seg_len) % spacing
         if len(cands) >= MAX_CANDIDATES_PER_ROOM:
             return cands[:MAX_CANDIDATES_PER_ROOM]
+    if not cands:
+        # Degenerate room: fall back to a single candidate at the inset
+        # representative point so a wall panel position always exists.
+        rep = inset.representative_point()
+        cands.append((room, (rep.x, rep.y)))
     return cands
 
 
@@ -537,9 +648,9 @@ def main():
     cal = calibrate(plan)
     scale = cal["scale_m_per_raw"]
 
-    print(f"Plan {args.plan_id} | scale {scale:.4f} m/raw-unit | "
+    print(f"Plan {args.plan_id} | scale {scale:.4f} m/raw-unit ({cal['method']}) | "
           f"median door width {cal['median_door_width_m'] and round(cal['median_door_width_m'], 3)} m | "
-          f"plausible={cal['door_width_plausible']}")
+          f"area-implied door {cal['area_implied_door_width_m'] and round(cal['area_implied_door_width_m'], 3)} m")
 
     rooms = extract_rooms(plan)
     eligible_ids = [rid for rid, r in rooms.items() if r["eligible"]]
@@ -553,9 +664,25 @@ def main():
           f"{global_graph.number_of_edges()} edges")
 
     # Reachability check for eligible rooms.
-    if global_graph.number_of_nodes() > 0:
+    eligible_ids = [rid for rid, r in rooms.items() if r["eligible"]]
+    unroutable_rooms = []
+    if global_graph.number_of_nodes() > 0 and eligible_ids:
         comps = list(nx.connected_components(global_graph))
         print(f"Connected components: {len(comps)}")
+        main_comp = max(comps, key=len)
+        dev_nodes_all = [(("dev", rid), rid) for rid in eligible_ids]
+        anchor = max(
+            (nd for nd, _ in dev_nodes_all if nd in global_graph),
+            key=lambda nd: len(nx.node_connected_component(global_graph, nd)),
+            default=None,
+        )
+        if anchor is not None:
+            reachable = nx.node_connected_component(global_graph, anchor)
+            unroutable_rooms = [
+                rid for nd, rid in dev_nodes_all if nd not in reachable
+            ]
+            if unroutable_rooms:
+                print(f"WARNING: dataset-sealed rooms (no verified portal): {unroutable_rooms}")
 
     # Sources: devices + panel candidates.
     devices = [(("dev", rid), rooms[rid]["device_point"]) for rid in eligible_ids]
@@ -643,6 +770,7 @@ def main():
         "paths": paths,
         "node_pos": {str(k): [round(v[0], 3), round(v[1], 3)] for k, v in node_pos.items()},
         "unreachable_from_first_device": [list(u) for u in unreachable],
+        "unroutable_rooms": unroutable_rooms,
         "notes": [
             "D and B computed with length-first Dijkstra; bend count measured on the chosen path.",
             "Portal pins offset +/-8cm for dead-end loop separation.",

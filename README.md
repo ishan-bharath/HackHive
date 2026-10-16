@@ -1,31 +1,32 @@
-# Honeywell HackHive � PS4
+# Honeywell HackHive — PS4
+
+Joint optimization of control-panel placement and closed-loop cable routing
+(Honeywell HackHive, problem statement PS4).
 
 ## Problem
-Joint optimization of control-panel placement, room assignment, and closed-loop cable routing.
+For any ResPlan floor plan: decide panel count/positions, room→panel
+assignment, and closed-loop cable routes. One device in every eligible room,
+max 20 devices / 100 m² per panel, contiguous territories, one closed
+non-branching loop per panel, cables only through verified doors/open
+passages.
 
-## Current Progress
-- Inspected the ResPlan floor-plan dataset.
-- Extracted candidate room-passage relationships.
-- Developed diagnostics for doorway geometry and passage connectivity.
-- Implemented experimental obstacle-aware and portal-aware routing prototypes.
-- Generated route visualizations and structured JSON diagnostics.
+## Pipeline
+| Module | File | What it does |
+|---|---|---|
+| M1 | `module1_portal_and_calibration.py` | Portal graph + calibration diagnostics |
+| M2 | `module2_wall_router_and_matrix.py` | Verified portals, wall-hugging router, APSP D/B matrices (true indoor metres + bend counts) |
+| M3 | `module3_joint_optimizer.py` | Contiguous partitioning, 2-opt TSP loops, Loop-First/Panel-Snap; baseline vs optimized |
+| M4 | `module4_validator_and_blueprint.py` | Independent validator, NFPA/NEC physics, CAD-style blueprint + final JSON |
+| —  | `run_pipeline.py` | Full chain + benchmark per plan (`--plan-id all --limit 25` for batch) |
 
-## Current Limitations
-- Candidate passages are not yet physically verified.
-- Cable routes are experimental and may cross walls or violate room boundaries.
-- Closed-loop cable routing is not implemented.
-- Joint optimization of panel placement, room assignments, and cable routing is not implemented.
-- Area calibration and panel-capacity enforcement remain incomplete.
-
-## Development Approach
-1. Validate room, wall, and doorway geometry.
-2. Implement physically constrained portal-aware routing.
-3. Construct and validate closed cable loops.
-4. Jointly optimize panel placement, room assignment, and cable routing.
-5. Compare results against a baseline using measurable metrics.
-
-## Data and Dependencies
-The ResPlan dataset is not included in this repository. Scripts currently rely on a local dataset installation and may require environment-specific path configuration.
+## Usage
+```powershell
+python run_pipeline.py --plan-id 14433          # single plan
+python run_pipeline.py --plan-id all --limit 25 # batch smoke test
+```
 
 ## Status
-Research and prototyping. Results are not yet validated for physical installation or code compliance.
+See `PROJECT_CONTEXT.md` for the live project state, verified bug list, and
+next steps. Current verified results: optimized solutions valid on 15/16
+completed smoke-test plans; optimized cable shorter than baseline in 14/14
+comparable plans (mean 6.1%, max 16.1%).
