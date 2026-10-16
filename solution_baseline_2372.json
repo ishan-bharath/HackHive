@@ -30,7 +30,7 @@
         11
       ],
       "loop_length_m": 22.513,
-      "loop_bends": 1,
+      "loop_bends": 5,
       "loop_coords": [
         [
           138.26,
@@ -126,8 +126,8 @@
     "panel_count": 1,
     "devices_total": 4,
     "total_cable_length_m": 22.513,
-    "total_bends": 1,
+    "total_bends": 5,
     "all_loops_routed": true,
-    "runtime_s": 0.032
+    "runtime_s": 0.016
   }
 }

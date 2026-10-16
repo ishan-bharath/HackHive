@@ -463,9 +463,15 @@ def build_panel_record(panel_si, loop, report, D, B, cluster, areas_m2):
             break
         coords.extend(seg if not coords else seg[1:])
         length += D[u, v]
-        bends += int(B[u, v])
     if not ok:
         length, bends = math.inf, -1
+    else:
+        # Count bends on the STITCHED loop polyline with the same rule as the
+        # M4 validator's NEC check (turn >= 45 deg at interior vertices).
+        # Summing per-segment B[u, v] misses the turn at every segment
+        # junction (each device/panel node), under-reporting ~1 bend per node.
+        loop_coords = [[round(x, 2), round(y, 2)] for x, y in coords]
+        bends = m2.count_bends(loop_coords)
 
     src = report["source_order"][panel_si]
     pos = report["node_pos"].get(str(tuple(src)))
@@ -480,7 +486,8 @@ def build_panel_record(panel_si, loop, report, D, B, cluster, areas_m2):
         "loop_source_indices": loop,
         "loop_length_m": round(length, 3) if math.isfinite(length) else None,
         "loop_bends": int(bends) if bends >= 0 else None,
-        "loop_coords": [[round(x, 2), round(y, 2)] for x, y in coords],
+        "loop_coords": [[round(x, 2), round(y, 2)] for x, y in coords]
+        if bends < 0 else loop_coords,
         "loop_valid": ok,
     }
 

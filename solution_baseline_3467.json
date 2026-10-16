@@ -27,7 +27,7 @@
         24
       ],
       "loop_length_m": 27.738,
-      "loop_bends": 3,
+      "loop_bends": 6,
       "loop_coords": [
         [
           175.56,
@@ -112,7 +112,7 @@
         37
       ],
       "loop_length_m": 3.812,
-      "loop_bends": 0,
+      "loop_bends": 1,
       "loop_coords": [
         [
           63.93,
@@ -149,7 +149,7 @@
         51
       ],
       "loop_length_m": 2.11,
-      "loop_bends": 0,
+      "loop_bends": 1,
       "loop_coords": [
         [
           39.0,
@@ -175,8 +175,8 @@
     "panel_count": 3,
     "devices_total": 5,
     "total_cable_length_m": 33.66,
-    "total_bends": 3,
+    "total_bends": 8,
     "all_loops_routed": true,
-    "runtime_s": 0.047
+    "runtime_s": 0.039
   }
 }
