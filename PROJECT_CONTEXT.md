@@ -73,10 +73,18 @@ Tier 2 (combinatorics, fast on matrices):
 | Module | File | Status |
 |---|---|---|
 | M1 | module1_portal_and_calibration.py | DONE (portal graph, candidate passages, calibration report) |
-| M2 | module2_wall_router_and_matrix.py | NOT STARTED |
+| M2 | module2_wall_router_and_matrix.py | DONE + VERIFIED on plan 14433 (see notes) |
+| M2v | verify_module2.py | DONE — checks all APSP paths: 0 wall crossings, 0 window hits, inside building |
 | M3 | module3_joint_optimizer.py | NOT STARTED |
 | M4 | module4_validator_and_blueprint.py | NOT STARTED |
 | runner | run_pipeline.py | NOT STARTED |
+
+M2 verified facts (plan 14433):
+- Calibration scale = sqrt(reported_area/inner_area) = 0.0512 m/raw-unit; door cross-check median 0.951 m (plausible). wall_depth raw = 4.5 (=0.23 m).
+- KEY INSIGHT: room polygons do NOT share boundary lines (separated by wall thickness) and DO overlap wall bands (~0.12 m). Door association must be by PROXIMITY (<0.3 m to both rooms). Open passages = wall-free spans of room-polygon line intersection (living-kitchen has a 3.0 m opening, no door leaf).
+- Graph: 248 nodes, 5412 edges, 1 component; 45 APSP sources (5 devices + 40 panel candidates).
+- Matrix JSON: matrix_14433.json (D_m, B_bends, paths, source_order, node_pos).
+- Bend counting: turns >= 45 deg on the length-optimal path (bends not optimized yet).
 
 Legacy scripts (diagnostics/prototypes, keep for reference, don't extend):
 cable_router.py, obstacle_router.py, passage_constrained_router.py, portal_route_planner.py
@@ -100,4 +108,6 @@ plus inspect_*/audit_*/visualize_*/diagnose_* diagnostics.
 
 ## 9. Current Next Step
 
-(Update always) -> Extract dataset, common.py, smoke-test M1 on plan 14433, then build M2.
+(Update always) -> Build module3_joint_optimizer.py: K_min clusters (contiguous partition
+of the room-portal graph), per-cluster TSP loops over D (2-opt), panel-snap; baseline mode
+first. Then module4 validator.
