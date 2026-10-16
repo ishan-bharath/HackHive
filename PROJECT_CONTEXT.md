@@ -98,7 +98,21 @@ No known open bugs in the pipeline.
 
 1. Core pipeline is DONE and green (25/25 valid both modes). Do NOT touch M2/M3
    core logic without re-running the batch.
-2. Stretch (optional): bend-weighted TSP cost, 100+ plan stats, final deck polish
-   (PPT in repo root — team name/members still placeholder).
-3. Documentation website (docs/ static site for GitHub Pages): NOT started —
-   awaiting explicit user approval. Build only after go-ahead.
+2. Judge-facing demo app DONE (`app.py`, single-file Flask, committed):
+   - Run: `python app.py` (auto-opens http://127.0.0.1:8000); `--host 0.0.0.0`
+     prints a LAN URL for judges; `--port`; `--no-browser`.
+   - Upload mode: one JSON-serialized plan dict, no dataset needed
+     (`python app.py --dump <plan_id> plan.json` produces one); plan-id mode
+     via `common.load_plan` when the dataset exists (graceful note otherwise).
+   - Runs M2->M3->M4 in-process (tier-1 report mirrors module2.main() exactly,
+     verified field-by-field vs matrix_14433.json); result page = PASS/FAIL
+     banner, blueprint with visitation badges/legend, baseline comparison,
+     checklist, metrics + % cable gain, NFPA/NEC/24V physics, collapsible JSON
+     + Download button. Pipeline errors -> friendly page, HTTP 200.
+   - Only M4 change: optional `out` param on render_blueprint (BytesIO ok),
+     default behavior unchanged, CLI verified identical.
+   - Tests done: 14433 plan-id PASS w/ badges; fresh plan 2814 upload identical
+     quality; garbage/missing-keys uploads -> friendly error; clean start +
+     browser auto-open confirmed; M4 CLI unchanged.
+3. Remaining: docs website (docs/ static site) — NOT started, awaiting explicit
+   user approval. Final deck polish (PPT in repo root — placeholders).

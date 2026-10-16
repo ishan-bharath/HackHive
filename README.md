@@ -25,8 +25,24 @@ python run_pipeline.py --plan-id 14433          # single plan
 python run_pipeline.py --plan-id all --limit 25 # batch smoke test
 ```
 
+## Demo UI
+```powershell
+python app.py                   # opens http://127.0.0.1:8000 in your browser
+python app.py --host 0.0.0.0    # judges on the same WiFi: http://<your-LAN-IP>:8000
+python app.py --port 8080 --no-browser
+```
+Single-page Flask app (`app.py`, no extra dependencies). Two input modes:
+- **Upload**: a `.json` file with one ResPlan plan dict (no dataset needed;
+  produce one with `python app.py --dump <plan_id> plan.json`), or
+- **Plan ID**: any ID from `dataset/ResPlan.pkl` when the dataset is present.
+
+It runs the full pipeline in-process (M2 → M3 → M4), shows the validated
+CAD blueprint (visitation order, legend), the baseline comparison, the
+validation checklist, metrics with % cable saving, Honeywell physics, and a
+downloadable result JSON. Errors (e.g. unwirable/sealed plans) get a friendly
+page, never a traceback.
+
 ## Status
-See `PROJECT_CONTEXT.md` for the live project state, verified bug list, and
-next steps. Current verified results: optimized solutions valid on 15/16
-completed smoke-test plans; optimized cable shorter than baseline in 14/14
-comparable plans (mean 6.1%, max 16.1%).
+See `PROJECT_CONTEXT.md` for the live project state and results. Current
+batch (25 plans): optimized AND baseline valid 25/25; optimized cable beats
+baseline on all 25 (mean 5.24%, max 16.1%).

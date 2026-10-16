@@ -281,7 +281,10 @@ def validate(plan, solution, scale):
 # CAD-style blueprint
 # ------------------------------------------------------------------
 
-def render_blueprint(plan, solution, validation, scale, out_png):
+def render_blueprint(plan, solution, validation, scale, out_png, out=None):
+    """Render the CAD-style blueprint. Writes to `out` when given (file path
+    or file-like object, e.g. BytesIO); otherwise to `out_png` exactly as
+    before. Default behavior is unchanged."""
     rooms = m2.extract_rooms(plan)
     fig, ax = plt.subplots(figsize=(16, 12))
     fig.patch.set_facecolor("#FFFFFF")
@@ -371,7 +374,11 @@ def render_blueprint(plan, solution, validation, scale, out_png):
     )
     ax.set_title(title, fontsize=13)
     plt.tight_layout()
-    plt.savefig(out_png, dpi=200, bbox_inches="tight", facecolor="#FFFFFF")
+    target = out_png if out is None else out
+    save_kwargs = dict(dpi=200, bbox_inches="tight", facecolor="#FFFFFF")
+    if out is not None:
+        save_kwargs["format"] = "png"
+    plt.savefig(target, **save_kwargs)
     plt.close(fig)
 
 
