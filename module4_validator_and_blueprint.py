@@ -33,6 +33,8 @@ import math
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
@@ -300,16 +302,35 @@ def render_blueprint(plan, solution, validation, scale, out_png):
             ys = [c[1] for c in coords]
             ax.plot(xs, ys, color=color, linewidth=2.2, zorder=5,
                     solid_joinstyle="round")
+            # Direction arrow at the loop start (panel -> first device).
+            if len(coords) >= 2:
+                (x0, y0), (x1, y1) = coords[0], coords[1]
+                t = 0.45
+                ax.annotate("", xy=(x0 + (x1 - x0) * (t + 0.12),
+                                    y0 + (y1 - y0) * (t + 0.12)),
+                            xytext=(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t),
+                            arrowprops=dict(arrowstyle="-|>", color=color,
+                                            lw=2.0), zorder=6)
         if panel.get("panel_position"):
             px, py = panel["panel_position"]
             ax.plot(px, py, marker="*", markersize=260 / fig.dpi * 3,
                     markerfacecolor=color, markeredgecolor="#111111", zorder=7)
             ax.text(px, py, f"  P{k+1}", fontsize=10, fontweight="bold",
                     color="#111111", zorder=8)
+        # Visitation numbers: badge i at the i-th device pull point in
+        # device_order; the panel (P#) is the loop start/end.
+        visit_no = {rid: i + 1
+                    for i, rid in enumerate(panel.get("device_order") or [])}
         for rid in panel["assigned_rooms"]:
             d = rooms[rid]["device_point"]
             ax.plot(d.x, d.y, marker="s", markersize=6, color=color,
                     markeredgecolor="#111111", zorder=6)
+            n = visit_no.get(rid)
+            if n is not None:
+                ax.text(d.x, d.y, str(n), fontsize=6.5, fontweight="bold",
+                        ha="center", va="center", color="#111111", zorder=9,
+                        bbox=dict(boxstyle="circle,pad=0.22",
+                                  facecolor="#FFFFFF", edgecolor=color, lw=1.1))
 
     for pp in validation["physics"]["nfpa72_classX_pinch_points"]:
         if pp["type"].startswith("unavoidable"):
@@ -322,6 +343,25 @@ def render_blueprint(plan, solution, validation, scale, out_png):
 
     ax.set_aspect("equal", adjustable="box")
     ax.axis("off")
+    # Legend: symbols, route semantics, visitation numbering.
+    handles = [
+        Line2D([], [], marker="*", ls="none", markersize=13,
+               markerfacecolor="#666666", markeredgecolor="#111111",
+               label="Control panel  P# (loop start/end)"),
+        Line2D([], [], marker="s", ls="none", markersize=8,
+               markerfacecolor="#666666", markeredgecolor="#111111",
+               label="Device - numbered badge = visit order (1, 2, ...)"),
+        Line2D([], [], color="#666666", lw=2.2,
+               label="Cable loop (closed, non-branching, through portals only)"),
+        Line2D([], [], marker="X", ls="none", markersize=9, color="#FF8C00",
+               label="Unavoidable doorway pinch point (NFPA 72 Class X)"),
+    ]
+    handles += [Patch(facecolor=c, alpha=0.35, edgecolor=c,
+                      label=f"Panel {i+1} territory (rooms served)")
+                for i, c in enumerate(palette[:len(solution["panels"])])]
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.01),
+              ncol=3, fontsize=8, framealpha=0.92, title="LEGEND",
+              title_fontsize=9)
     metrics = solution["metrics"]
     title = (
         f"PS4 Solution Blueprint - plan {solution['plan_id']} ({solution['mode']})\n"
