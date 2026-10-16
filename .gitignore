@@ -11,6 +11,8 @@ env/
 .cache/
 data/
 datasets/
+dataset/
+archive.zip
 
 # Generated diagnostic outputs
 *.png

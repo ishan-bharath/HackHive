@@ -5,15 +5,14 @@ from pathlib import Path
 import networkx as nx
 from shapely.geometry import Polygon, MultiPolygon
 
+import common
+
 
 # ============================================================
 # CONFIGURATION
 # ============================================================
 
-DATASET_PATH = Path(
-    r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"
-    r"\resplan\versions\12\ResPlan.pkl"
-)
+DATASET_PATH = common.DATASET_PKL
 
 PLAN_ID = "14433"
 
