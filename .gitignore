@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Datasets and cached data
+*.pkl
+*.pickle
+.cache/
+data/
+datasets/
+
+# Generated diagnostic outputs
+*.png
+*.jpg
+*.jpeg
+*.csv
+*.log
+
+# Secrets
+.env
+.env.*
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
