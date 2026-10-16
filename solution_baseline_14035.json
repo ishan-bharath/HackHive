@@ -122,11 +122,12 @@
     }
   ],
   "metrics": {
+    "unroutable_rooms": [],
     "panel_count": 1,
     "devices_total": 4,
     "total_cable_length_m": 29.318,
     "total_bends": 3,
     "all_loops_routed": true,
-    "runtime_s": 0.02
+    "runtime_s": 0.038
   }
 }

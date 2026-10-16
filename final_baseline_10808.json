@@ -33,8 +33,8 @@
           2,
           20
         ],
-        "loop_length_m": null,
-        "loop_bends": null,
+        "loop_length_m": 28.012,
+        "loop_bends": 4,
         "loop_coords": [
           [
             155.6,
@@ -43,45 +43,160 @@
           [
             136.24,
             199.41
+          ],
+          [
+            119.81,
+            165.28
+          ],
+          [
+            119.81,
+            163.04
+          ],
+          [
+            125.36,
+            161.28
+          ],
+          [
+            169.8,
+            162.43
+          ],
+          [
+            210.72,
+            199.41
+          ],
+          [
+            169.8,
+            162.43
+          ],
+          [
+            110.67,
+            132.49
+          ],
+          [
+            93.8,
+            132.49
+          ],
+          [
+            89.96,
+            136.98
+          ],
+          [
+            52.02,
+            177.59
+          ],
+          [
+            89.96,
+            136.98
+          ],
+          [
+            89.96,
+            132.49
+          ],
+          [
+            89.96,
+            112.66
+          ],
+          [
+            89.96,
+            108.16
+          ],
+          [
+            52.02,
+            71.67
+          ],
+          [
+            89.96,
+            108.16
+          ],
+          [
+            93.8,
+            112.66
+          ],
+          [
+            107.79,
+            129.61
+          ],
+          [
+            119.81,
+            163.04
+          ],
+          [
+            119.81,
+            165.28
+          ],
+          [
+            125.13,
+            167.04
+          ],
+          [
+            155.6,
+            169.8
           ]
         ],
-        "loop_valid": false,
+        "loop_valid": true,
         "capacity_violation_m2": 0.0
       }
     ],
     "metrics": {
+      "unroutable_rooms": [],
       "panel_count": 1,
       "devices_total": 4,
-      "total_cable_length_m": null,
-      "total_bends": 0,
-      "all_loops_routed": false,
-      "runtime_s": 0.0
+      "total_cable_length_m": 28.012,
+      "total_bends": 4,
+      "all_loops_routed": true,
+      "runtime_s": 0.019
     }
   },
   "validation": {
     "checks": {
       "assignment_complete": true,
       "capacity": true,
-      "contiguity": false,
-      "closed_loops": false,
+      "contiguity": true,
+      "closed_loops": true,
       "physical_routes": true,
       "legal_transitions": true
     },
-    "violations": [
-      "panel 0 territory not contiguous",
-      "panel 0 loop is not closed"
-    ],
-    "all_valid": false,
+    "violations": [],
+    "all_valid": true,
+    "dataset_sealed_rooms": [],
     "physics": {
-      "nfpa72_classX_pinch_points": [],
+      "nfpa72_classX_pinch_points": [
+        {
+          "panel": 0,
+          "room_pair": [
+            "bedroom_1",
+            "living_0"
+          ],
+          "uses": 2,
+          "type": "unavoidable (dead-end)"
+        },
+        {
+          "panel": 0,
+          "room_pair": [
+            "bedroom_0",
+            "living_0"
+          ],
+          "uses": 2,
+          "type": "unavoidable (dead-end)"
+        },
+        {
+          "panel": 0,
+          "room_pair": [
+            "kitchen_0",
+            "living_0"
+          ],
+          "uses": 2,
+          "type": "unavoidable (dead-end)"
+        }
+      ],
       "nec_bend_violations": [],
       "voltage_drop_24v": [
         {
           "panel": 0,
-          "loop_length_m": 1.474,
-          "loop_resistance_ohm": 0.031,
+          "loop_length_m": 28.013,
+          "loop_resistance_ohm": 0.588,
           "current_a": 0.018,
-          "voltage_drop_v": 0.0006,
+          "voltage_drop_v": 0.0106,
           "within_limit": true
         }
       ]

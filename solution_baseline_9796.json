@@ -1,0 +1,125 @@
+{
+  "plan_id": "9796",
+  "mode": "baseline",
+  "panels": [
+    {
+      "panel_room": "kitchen_0",
+      "panel_position": [
+        140.306,
+        86.427
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "bedroom_1",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 67.16,
+      "device_order": [
+        "kitchen_0",
+        "living_0",
+        "bedroom_1",
+        "bedroom_0"
+      ],
+      "loop_source_indices": [
+        20,
+        1,
+        0,
+        3,
+        2,
+        20
+      ],
+      "loop_length_m": 24.134,
+      "loop_bends": 3,
+      "loop_coords": [
+        [
+          140.31,
+          86.43
+        ],
+        [
+          111.63,
+          62.5
+        ],
+        [
+          109.5,
+          91.73
+        ],
+        [
+          109.5,
+          93.84
+        ],
+        [
+          71.83,
+          107.4
+        ],
+        [
+          131.69,
+          143.85
+        ],
+        [
+          135.23,
+          148.07
+        ],
+        [
+          170.61,
+          183.64
+        ],
+        [
+          135.23,
+          148.07
+        ],
+        [
+          135.23,
+          143.85
+        ],
+        [
+          172.54,
+          132.56
+        ],
+        [
+          176.77,
+          132.56
+        ],
+        [
+          216.03,
+          105.64
+        ],
+        [
+          176.77,
+          132.56
+        ],
+        [
+          172.54,
+          132.56
+        ],
+        [
+          140.31,
+          122.72
+        ],
+        [
+          113.05,
+          93.84
+        ],
+        [
+          113.05,
+          91.73
+        ],
+        [
+          140.31,
+          86.43
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "unroutable_rooms": [],
+    "panel_count": 1,
+    "devices_total": 4,
+    "total_cable_length_m": 24.134,
+    "total_bends": 3,
+    "all_loops_routed": true,
+    "runtime_s": 0.041
+  }
+}

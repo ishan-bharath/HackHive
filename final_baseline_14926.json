@@ -33,8 +33,8 @@
           0,
           14
         ],
-        "loop_length_m": 19.904,
-        "loop_bends": 2,
+        "loop_length_m": 18.98,
+        "loop_bends": 3,
         "loop_coords": [
           [
             133.45,
@@ -45,12 +45,12 @@
             88.47
           ],
           [
-            122.23,
-            120.13
+            132.24,
+            116.67
           ],
           [
-            122.23,
-            128.18
+            132.24,
+            119.24
           ],
           [
             122.23,
@@ -101,16 +101,12 @@
             117.96
           ],
           [
-            122.23,
-            128.18
+            136.58,
+            119.24
           ],
           [
-            122.23,
-            120.13
-          ],
-          [
-            125.49,
-            114.7
+            136.58,
+            116.67
           ],
           [
             133.45,
@@ -122,12 +118,13 @@
       }
     ],
     "metrics": {
+      "unroutable_rooms": [],
       "panel_count": 1,
       "devices_total": 4,
-      "total_cable_length_m": 19.904,
-      "total_bends": 2,
+      "total_cable_length_m": 18.98,
+      "total_bends": 3,
       "all_loops_routed": true,
-      "runtime_s": 0.016
+      "runtime_s": 0.032
     }
   },
   "validation": {
@@ -141,6 +138,7 @@
     },
     "violations": [],
     "all_valid": true,
+    "dataset_sealed_rooms": [],
     "physics": {
       "nfpa72_classX_pinch_points": [
         {
@@ -150,7 +148,7 @@
             "living_0"
           ],
           "uses": 2,
-          "type": "avoidable"
+          "type": "unavoidable (dead-end)"
         },
         {
           "panel": 0,
@@ -175,10 +173,10 @@
       "voltage_drop_24v": [
         {
           "panel": 0,
-          "loop_length_m": 19.903,
-          "loop_resistance_ohm": 0.418,
+          "loop_length_m": 18.979,
+          "loop_resistance_ohm": 0.399,
           "current_a": 0.018,
-          "voltage_drop_v": 0.0075,
+          "voltage_drop_v": 0.0072,
           "within_limit": true
         }
       ]

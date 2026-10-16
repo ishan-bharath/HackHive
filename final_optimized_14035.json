@@ -124,6 +124,8 @@
     "metrics": {
       "k_min_theoretical": 1,
       "k_used": 1,
+      "capacity_relaxed": false,
+      "unroutable_rooms": [],
       "panel_count": 1,
       "devices_total": 4,
       "total_cable_length_m": 28.713,
@@ -143,6 +145,7 @@
     },
     "violations": [],
     "all_valid": true,
+    "dataset_sealed_rooms": [],
     "physics": {
       "nfpa72_classX_pinch_points": [
         {
@@ -161,7 +164,7 @@
             "living_0"
           ],
           "uses": 2,
-          "type": "avoidable"
+          "type": "unavoidable (dead-end)"
         },
         {
           "panel": 0,

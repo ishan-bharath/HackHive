@@ -126,12 +126,13 @@
       }
     ],
     "metrics": {
+      "unroutable_rooms": [],
       "panel_count": 1,
       "devices_total": 4,
       "total_cable_length_m": 22.513,
       "total_bends": 1,
       "all_loops_routed": true,
-      "runtime_s": 0.022
+      "runtime_s": 0.016
     }
   },
   "validation": {
@@ -145,6 +146,7 @@
     },
     "violations": [],
     "all_valid": true,
+    "dataset_sealed_rooms": [],
     "physics": {
       "nfpa72_classX_pinch_points": [
         {
@@ -154,7 +156,7 @@
             "living_0"
           ],
           "uses": 2,
-          "type": "avoidable"
+          "type": "unavoidable (dead-end)"
         },
         {
           "panel": 0,
@@ -163,7 +165,7 @@
             "living_0"
           ],
           "uses": 2,
-          "type": "avoidable"
+          "type": "unavoidable (dead-end)"
         },
         {
           "panel": 0,

@@ -5,8 +5,8 @@
     {
       "panel_room": "living_0",
       "panel_position": [
-        93.191,
-        110.869
+        152.385,
+        118.882
       ],
       "assigned_rooms": [
         "bedroom_0",
@@ -17,22 +17,24 @@
       "assigned_area_m2": 67.35,
       "device_order": [
         "bedroom_0",
-        "bedroom_1",
-        "kitchen_0"
+        "living_0",
+        "kitchen_0",
+        "bedroom_1"
       ],
       "loop_source_indices": [
-        0,
+        12,
         2,
-        3,
+        0,
         1,
-        0
+        3,
+        12
       ],
-      "loop_length_m": null,
-      "loop_bends": null,
+      "loop_length_m": 23.643,
+      "loop_bends": 3,
       "loop_coords": [
         [
-          93.19,
-          110.87
+          152.38,
+          118.88
         ],
         [
           185.83,
@@ -55,7 +57,35 @@
           112.05
         ],
         [
-          122.29,
+          93.19,
+          110.87
+        ],
+        [
+          87.48,
+          122.93
+        ],
+        [
+          87.48,
+          124.57
+        ],
+        [
+          86.06,
+          147.05
+        ],
+        [
+          87.48,
+          124.57
+        ],
+        [
+          87.48,
+          122.93
+        ],
+        [
+          107.82,
+          120.6
+        ],
+        [
+          119.45,
           121.01
         ],
         [
@@ -65,20 +95,34 @@
         [
           139.79,
           158.56
+        ],
+        [
+          122.29,
+          124.3
+        ],
+        [
+          122.29,
+          121.01
+        ],
+        [
+          152.38,
+          118.88
         ]
       ],
-      "loop_valid": false,
+      "loop_valid": true,
       "capacity_violation_m2": 0.0
     }
   ],
   "metrics": {
     "k_min_theoretical": 1,
     "k_used": 1,
+    "capacity_relaxed": false,
+    "unroutable_rooms": [],
     "panel_count": 1,
     "devices_total": 4,
-    "total_cable_length_m": null,
-    "total_bends": 0,
-    "all_loops_routed": false,
-    "runtime_s": 0.015
+    "total_cable_length_m": 23.643,
+    "total_bends": 3,
+    "all_loops_routed": true,
+    "runtime_s": 0.016
   }
 }

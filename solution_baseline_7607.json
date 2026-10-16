@@ -133,6 +133,7 @@
     }
   ],
   "metrics": {
+    "unroutable_rooms": [],
     "panel_count": 1,
     "devices_total": 5,
     "total_cable_length_m": 34.873,

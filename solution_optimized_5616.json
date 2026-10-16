@@ -1,0 +1,101 @@
+{
+  "plan_id": "5616",
+  "mode": "optimized",
+  "panels": [
+    {
+      "panel_room": "living_0",
+      "panel_position": [
+        187.578,
+        112.54
+      ],
+      "assigned_rooms": [
+        "bedroom_0",
+        "kitchen_0",
+        "living_0"
+      ],
+      "assigned_area_m2": 27.55,
+      "device_order": [
+        "bedroom_0",
+        "living_0",
+        "kitchen_0"
+      ],
+      "loop_source_indices": [
+        7,
+        2,
+        0,
+        1,
+        7
+      ],
+      "loop_length_m": 14.859,
+      "loop_bends": 1,
+      "loop_coords": [
+        [
+          187.58,
+          112.54
+        ],
+        [
+          82.47,
+          118.34
+        ],
+        [
+          78.35,
+          118.34
+        ],
+        [
+          39.63,
+          144.72
+        ],
+        [
+          78.35,
+          118.34
+        ],
+        [
+          82.47,
+          118.34
+        ],
+        [
+          136.29,
+          118.61
+        ],
+        [
+          190.0,
+          120.91
+        ],
+        [
+          192.06,
+          120.91
+        ],
+        [
+          225.12,
+          159.0
+        ],
+        [
+          192.06,
+          120.91
+        ],
+        [
+          190.0,
+          116.31
+        ],
+        [
+          187.58,
+          112.54
+        ]
+      ],
+      "loop_valid": true,
+      "capacity_violation_m2": 0.0
+    }
+  ],
+  "metrics": {
+    "k_min_theoretical": 1,
+    "k_used": 1,
+    "capacity_relaxed": false,
+    "unroutable_rooms": [],
+    "panel_count": 1,
+    "devices_total": 3,
+    "total_cable_length_m": 14.859,
+    "total_bends": 1,
+    "all_loops_routed": true,
+    "runtime_s": 0.0
+  }
+}

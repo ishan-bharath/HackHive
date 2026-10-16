@@ -95,7 +95,7 @@
       "id": 2,
       "rooms": [
         "living_0",
-        "bedroom_1"
+        "bathroom_1"
       ],
       "edge_type": "via_door",
       "width_m": 0.85,
@@ -108,19 +108,6 @@
       "id": 3,
       "rooms": [
         "living_0",
-        "bathroom_1"
-      ],
-      "edge_type": "via_door",
-      "width_m": 0.85,
-      "center": [
-        57.226,
-        125.89
-      ]
-    },
-    {
-      "id": 4,
-      "rooms": [
-        "living_0",
         "kitchen_0"
       ],
       "edge_type": "via_door",
@@ -131,7 +118,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": 4,
       "rooms": [
         "bedroom_0",
         "bathroom_0"
@@ -141,19 +128,6 @@
       "center": [
         213.159,
         132.028
-      ]
-    },
-    {
-      "id": 6,
-      "rooms": [
-        "bathroom_1",
-        "bedroom_1"
-      ],
-      "edge_type": "geometric",
-      "width_m": 0.85,
-      "center": [
-        57.226,
-        125.89
       ]
     }
   ],
@@ -25377,18 +25351,10 @@
       124.121
     ],
     "('pin_3_1', 'living_0')": [
-      59.336,
-      127.659
-    ],
-    "('pin_3_2', 'living_0')": [
-      59.336,
-      124.121
-    ],
-    "('pin_4_1', 'living_0')": [
       84.121,
       137.686
     ],
-    "('pin_4_2', 'living_0')": [
+    "('pin_3_2', 'living_0')": [
       80.582,
       137.686
     ],
@@ -25628,11 +25594,11 @@
       82.543,
       166.552
     ],
-    "('pin_4_1', 'kitchen_0')": [
+    "('pin_3_1', 'kitchen_0')": [
       84.121,
       139.796
     ],
-    "('pin_4_2', 'kitchen_0')": [
+    "('pin_3_2', 'kitchen_0')": [
       80.582,
       139.796
     ],
@@ -25768,11 +25734,11 @@
       184.773,
       145.219
     ],
-    "('pin_5_1', 'bedroom_0')": [
+    "('pin_4_1', 'bedroom_0')": [
       214.928,
       134.138
     ],
-    "('pin_5_2', 'bedroom_0')": [
+    "('pin_4_2', 'bedroom_0')": [
       211.39,
       134.138
     ],
@@ -25896,22 +25862,6 @@
       94.008,
       112.272
     ],
-    "('pin_2_1', 'bedroom_1')": [
-      57.104,
-      113.587
-    ],
-    "('pin_2_2', 'bedroom_1')": [
-      57.104,
-      110.049
-    ],
-    "('pin_6_1', 'bedroom_1')": [
-      57.104,
-      113.587
-    ],
-    "('pin_6_2', 'bedroom_1')": [
-      57.104,
-      110.049
-    ],
     "('ring_0', 'bedroom_1')": [
       3.298,
       33.342
@@ -26024,11 +25974,11 @@
       207.981,
       104.409
     ],
-    "('pin_5_1', 'bathroom_0')": [
+    "('pin_4_1', 'bathroom_0')": [
       214.928,
       129.918
     ],
-    "('pin_5_2', 'bathroom_0')": [
+    "('pin_4_2', 'bathroom_0')": [
       211.39,
       129.918
     ],
@@ -26104,19 +26054,11 @@
       39.58,
       142.385
     ],
-    "('pin_3_1', 'bathroom_1')": [
+    "('pin_2_1', 'bathroom_1')": [
       55.116,
       127.659
     ],
-    "('pin_3_2', 'bathroom_1')": [
-      55.116,
-      124.121
-    ],
-    "('pin_6_1', 'bathroom_1')": [
-      55.116,
-      127.659
-    ],
-    "('pin_6_2', 'bathroom_1')": [
+    "('pin_2_2', 'bathroom_1')": [
       55.116,
       124.121
     ],
@@ -26186,6 +26128,7 @@
     ]
   },
   "unreachable_from_first_device": [],
+  "unroutable_rooms": [],
   "notes": [
     "D and B computed with length-first Dijkstra; bend count measured on the chosen path.",
     "Portal pins offset +/-8cm for dead-end loop separation.",

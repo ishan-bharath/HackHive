@@ -29,8 +29,8 @@
         2,
         35
       ],
-      "loop_length_m": null,
-      "loop_bends": null,
+      "loop_length_m": 23.799,
+      "loop_bends": 4,
       "loop_coords": [
         [
           129.69,
@@ -39,18 +39,87 @@
         [
           139.79,
           158.56
+        ],
+        [
+          122.29,
+          124.3
+        ],
+        [
+          119.45,
+          121.01
+        ],
+        [
+          107.82,
+          120.6
+        ],
+        [
+          87.48,
+          122.93
+        ],
+        [
+          87.48,
+          124.57
+        ],
+        [
+          86.06,
+          147.05
+        ],
+        [
+          87.48,
+          124.57
+        ],
+        [
+          87.48,
+          122.93
+        ],
+        [
+          93.19,
+          110.87
+        ],
+        [
+          185.83,
+          112.05
+        ],
+        [
+          189.12,
+          112.05
+        ],
+        [
+          222.29,
+          92.09
+        ],
+        [
+          189.12,
+          112.05
+        ],
+        [
+          185.83,
+          112.05
+        ],
+        [
+          122.29,
+          121.01
+        ],
+        [
+          122.29,
+          124.3
+        ],
+        [
+          129.69,
+          126.43
         ]
       ],
-      "loop_valid": false,
+      "loop_valid": true,
       "capacity_violation_m2": 0.0
     }
   ],
   "metrics": {
+    "unroutable_rooms": [],
     "panel_count": 1,
     "devices_total": 4,
-    "total_cable_length_m": null,
-    "total_bends": 0,
-    "all_loops_routed": false,
-    "runtime_s": 0.016
+    "total_cable_length_m": 23.799,
+    "total_bends": 4,
+    "all_loops_routed": true,
+    "runtime_s": 0.032
   }
 }

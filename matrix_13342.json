@@ -45003,6 +45003,7 @@
     ]
   },
   "unreachable_from_first_device": [],
+  "unroutable_rooms": [],
   "notes": [
     "D and B computed with length-first Dijkstra; bend count measured on the chosen path.",
     "Portal pins offset +/-8cm for dead-end loop separation.",

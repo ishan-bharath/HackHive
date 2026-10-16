@@ -153,11 +153,13 @@
   "metrics": {
     "k_min_theoretical": 2,
     "k_used": 2,
+    "capacity_relaxed": false,
+    "unroutable_rooms": [],
     "panel_count": 2,
     "devices_total": 5,
     "total_cable_length_m": 34.377,
     "total_bends": 3,
     "all_loops_routed": true,
-    "runtime_s": 0.031
+    "runtime_s": 0.032
   }
 }

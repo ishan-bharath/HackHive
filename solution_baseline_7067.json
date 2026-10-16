@@ -29,8 +29,8 @@
         2,
         15
       ],
-      "loop_length_m": 22.442,
-      "loop_bends": 3,
+      "loop_length_m": 22.533,
+      "loop_bends": 4,
       "loop_coords": [
         [
           100.46,
@@ -85,8 +85,16 @@
           110.16
         ],
         [
-          92.95,
-          114.74
+          103.63,
+          114.09
+        ],
+        [
+          94.61,
+          122.83
+        ],
+        [
+          90.68,
+          126.22
         ],
         [
           45.56,
@@ -110,11 +118,12 @@
     }
   ],
   "metrics": {
+    "unroutable_rooms": [],
     "panel_count": 1,
     "devices_total": 4,
-    "total_cable_length_m": 22.442,
-    "total_bends": 3,
+    "total_cable_length_m": 22.533,
+    "total_bends": 4,
     "all_loops_routed": true,
-    "runtime_s": 0.032
+    "runtime_s": 0.031
   }
 }
