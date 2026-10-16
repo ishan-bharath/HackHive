@@ -337,9 +337,8 @@ FORM_PAGE = """
 <style>{{ style }}</style></head><body>
 <header class="hero"><div class="wrap">
 <h1>PS4 - Joint Optimization of Control-Panel Placement and Closed-Loop Cable Routing</h1>
-<p class="sub">Honeywell HackHive demo. Runs the full pipeline in-process: verified portals,
-wall-hugging raceways, capacity-feasible contiguous partition, 2-opt closed loops,
-independent validator + CAD blueprint.</p>
+<p class="sub">Upload a floor plan - the system places control panels, routes compliant
+closed-loop fire-alarm cable through real doorways, and independently validates every constraint.</p>
 </div></header>
 <div class="wrap">
 <div class="card">
@@ -349,9 +348,7 @@ independent validator + CAD blueprint.</p>
   <input type="file" name="file" accept=".json,application/json" required>
   <button type="submit">Run pipeline</button>
 </form>
-<p class="note">Upload ONE ResPlan plan dict as JSON (keys: <code>id</code>, <code>graph</code>,
-<code>inner</code>, <code>wall</code>, <code>door</code>, ...). Use
-<code>python app.py --dump &lt;plan_id&gt; plan.json</code> to produce one from the dataset.</p>
+<p class="note">One ResPlan plan dict per file. Sample plan files are provided - ask the presenter.</p>
 </div>
 <div class="card">
 <h2>Option B - Plan ID from the local dataset</h2>
@@ -449,16 +446,21 @@ arrow = loop direction; orange X = unavoidable doorway pinch point.</p>
 {% for f in physics['nec_bend_violations'] %}
   <span class="small">- panel {{ f.panel + 1 }}: max {{ f.max_bends_between_pulls }} bends between pull points</span>
 {% else %}<span class="small">none</span>{% endfor %}</p>
-<h3>24 V voltage drop (18 AWG)</h3>
+<p><b>24 V loop voltage drop (18 AWG):</b> worst {{ worst_drop_v }} V across
+{{ n_panels }} panel(s) - limit 3 V -
+<span class="check {{ 'pass' if all_within else 'fail' }}">{{ 'PASS' if all_within else 'FAIL' }}</span></p>
+{% if not all_within %}
 <table>
   <tr><th>Panel</th><th>Loop length (m)</th><th>Resistance (ohm)</th><th>Current (A)</th>
       <th>Drop (V)</th><th>Within 3 V limit</th></tr>
   {% for v in physics['voltage_drop_24v'] %}
-  <tr><td>{{ v.panel + 1 }}</td><td>{{ v.loop_length_m }}</td><td>{{ v.loop_resistance_ohm }}</td>
+  <tr {% if not v.within_limit %}style="background:#FADBD8"{% endif %}>
+      <td>{{ v.panel + 1 }}</td><td>{{ v.loop_length_m }}</td><td>{{ v.loop_resistance_ohm }}</td>
       <td>{{ v.current_a }}</td><td>{{ v.voltage_drop_v }}</td>
       <td class="check {{ 'pass' if v.within_limit else 'fail' }}">{{ v.within_limit }}</td></tr>
   {% endfor %}
 </table>
+{% endif %}
 </div>
 
 <div class="card">
@@ -538,6 +540,11 @@ def run():
                 return _error_page(f"Plan {plan_id} not found: {exc}",
                                    "Double-check the plan ID and try again.")
         ctx, final_opt = run_pipeline(plan, plan_id)
+        # Voltage-drop summary for the result page (full table only on FAIL).
+        vd = ctx["physics"]["voltage_drop_24v"]
+        ctx["worst_drop_v"] = max((v["voltage_drop_v"] for v in vd), default=0.0)
+        ctx["all_within"] = all(v["within_limit"] for v in vd)
+        ctx["n_panels"] = len(vd)
         token = uuid.uuid4().hex[:12]
         RESULTS[token] = json.dumps(final_opt, indent=2)
         return render_template_string(
