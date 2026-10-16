@@ -124,7 +124,7 @@
       "total_cable_length_m": 18.98,
       "total_bends": 3,
       "all_loops_routed": true,
-      "runtime_s": 0.032
+      "runtime_s": 0.037
     }
   },
   "validation": {

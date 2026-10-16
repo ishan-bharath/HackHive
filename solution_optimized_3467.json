@@ -3,55 +3,47 @@
   "mode": "optimized",
   "panels": [
     {
-      "panel_room": "living_0",
+      "panel_room": "bedroom_0",
       "panel_position": [
-        167.126,
-        133.983
+        145.226,
+        140.591
       ],
       "assigned_rooms": [
-        "bedroom_2",
+        "bedroom_0",
         "kitchen_0",
         "living_0"
       ],
-      "assigned_area_m2": 81.41,
+      "assigned_area_m2": 82.52,
       "device_order": [
-        "bedroom_2",
+        "bedroom_0",
         "living_0",
         "kitchen_0"
       ],
       "loop_source_indices": [
-        8,
-        4,
+        30,
+        2,
         0,
         1,
-        8
+        30
       ],
-      "loop_length_m": 36.575,
-      "loop_bends": 1,
+      "loop_length_m": 27.598,
+      "loop_bends": 2,
       "loop_coords": [
         [
-          167.13,
-          133.98
+          145.23,
+          140.59
         ],
         [
-          77.81,
-          121.21
+          125.54,
+          179.27
         ],
         [
-          74.42,
-          121.21
+          145.69,
+          139.24
         ],
         [
-          35.01,
-          95.77
-        ],
-        [
-          74.42,
-          121.21
-        ],
-        [
-          77.81,
-          121.21
+          148.18,
+          135.85
         ],
         [
           193.92,
@@ -86,8 +78,16 @@
           135.85
         ],
         [
-          167.13,
-          133.98
+          148.18,
+          135.85
+        ],
+        [
+          145.69,
+          139.24
+        ],
+        [
+          145.23,
+          140.59
         ]
       ],
       "loop_valid": true,
@@ -131,37 +131,37 @@
       "capacity_violation_m2": 0.0
     },
     {
-      "panel_room": "bedroom_0",
+      "panel_room": "bedroom_2",
       "panel_position": [
-        98.769,
-        187.982
+        38.996,
+        79.831
       ],
       "assigned_rooms": [
-        "bedroom_0"
+        "bedroom_2"
       ],
-      "assigned_area_m2": 19.49,
+      "assigned_area_m2": 18.38,
       "device_order": [
-        "bedroom_0"
+        "bedroom_2"
       ],
       "loop_source_indices": [
-        33,
-        2,
-        33
+        51,
+        4,
+        51
       ],
-      "loop_length_m": 3.614,
+      "loop_length_m": 2.11,
       "loop_bends": 0,
       "loop_coords": [
         [
-          98.77,
-          187.98
+          39.0,
+          79.83
         ],
         [
-          125.54,
-          179.27
+          35.01,
+          95.77
         ],
         [
-          98.77,
-          187.98
+          39.0,
+          79.83
         ]
       ],
       "loop_valid": true,
@@ -177,9 +177,9 @@
     ],
     "panel_count": 3,
     "devices_total": 5,
-    "total_cable_length_m": 44.001,
-    "total_bends": 1,
+    "total_cable_length_m": 33.52,
+    "total_bends": 2,
     "all_loops_routed": true,
-    "runtime_s": 0.017
+    "runtime_s": 0.078
   }
 }

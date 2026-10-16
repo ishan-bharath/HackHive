@@ -39,50 +39,46 @@ B (90° bends) between devices + candidate panel wall spots.
 Tier 2 (combinatorics, fast): K_min clusters via BFS region-growing (contiguity guarded),
 per-cluster 2-opt TSP on D, Loop-First/Panel-Snap panel placement.
 
-## 5. Module Map + Status (2026-10-16 15:00)
+## 5. Module Map + Status (2026-10-16, after fix round)
 
 | Module | File | Status |
 |---|---|---|
 | M1 | module1_portal_and_calibration.py | DONE (superseded by M2's calibration; diagnostics only) |
-| M2 | module2_wall_router_and_matrix.py | REWRITTEN (uncommitted): opposite-side door test `_door_opens_between`, portals from all touching room pairs (not just graph edges), door-width calibration, `unroutable_rooms` report |
-| M2v | verify_module2.py | EDITED (uncommitted): wall erosion 0.02 m, expanded building envelope |
-| M3 | module3_joint_optimizer.py | EDITED (uncommitted): find_partition tries k_min..k_min+4 ascending; consumes `unroutable_rooms`; **KNOWN BUG — see §6** |
-| M4 | module4_validator_and_blueprint.py | EDITED (uncommitted): sealed rooms excluded from assignment check (module4:82); **KNOWN BUG — see §6** |
-| runner | run_pipeline.py | unchanged; works but gated on M4 exit code |
+| M2 | module2_wall_router_and_matrix.py | DONE (opposite-side door test, door-width calibration, unroutable_rooms report) |
+| M2v | verify_module2.py | DONE (wall erosion 0.02 m, expanded building envelope) |
+| M3 | module3_joint_optimizer.py | DONE: find_partition enforces 100 m2 cap per cluster (component pre-split included); fewest-panels-then-least-cable selection; cost-aware splits (MAX_SPLIT_COST_EVALS=160 cap) with stub-aware cluster cost; baseline last-resort attach only if contiguous+within cap else own panel |
+| M4 | module4_validator_and_blueprint.py | DONE: always exits 0 (verdict is data); validator unchanged |
+| runner | run_pipeline.py | unchanged; batch works, 25/25 complete |
 
-SMOKE-TESTED after the abrupt agent stop: `python module3_joint_optimizer.py --plan-id
-14433 --mode both` + M4 both modes → ALL CHECKS PASS (baseline 36.939 m, optimized
-33.866 m, 1 panel, 5 devices).
+All fixes COMMITTED and PUSHED (see git log). Batch outputs (JSON) committed.
 
-## 6. Verified Open Bugs (priority order — FIX THESE FIRST)
+## 6. Verified Open Bugs — ALL RESOLVED (2026-10-16)
 
-1. **M3 capacity check missing on component pre-split.** When the eligible graph
-   pre-splits into components (e.g. a sealed room), `grow_partition` returns components
-   as-is WITHOUT checking the 100 m² cap per cluster. Evidence: plan 3467 optimized
-   panel 0 = 123.73 m² (final_optimized_3467.json), `capacity_relaxed=False` yet invalid.
-   FIX: validate `sum(areas) <= 100` for every cluster in find_partition before returning;
-   if a component alone exceeds the cap, split it or mark capacity_relaxed=True.
-2. **M4 `raise SystemExit(1)` on validation FAIL** (end of main()). run_pipeline gates
-   M4-baseline on M4-optimized success (`ok &= run(...)`), so whenever optimized is
-   invalid the baseline benchmark is silently SKIPPED (final_baseline_3467.json missing).
-   FIX: always exit 0 — the verdict is data, not a crash; aggregate pass/fail in runner.
-3. **Baseline policy:** last-resort attach ignores contiguity (plan 10808 "territory not
-   contiguous") and capacity (plan 2373 baseline 107.36 m²). FIX: attach only if
-   contiguous, else give the room its own panel.
-4. **Stale outputs:** everything except 3467/13342/14433 was produced by PRE-rewrite M2/M3.
-   After fixes 1-2: full batch re-run `python run_pipeline.py --plan-id all --limit 25`,
-   then compare against the recorded 16/20 baseline and investigate regressions.
+1. ~~M3 capacity check missing on component pre-split~~ FIXED: find_partition
+   validates `sum(areas) <= 100` per cluster; oversized single components get
+   a relaxed-split fallback in grow_partition or `capacity_relaxed=True`.
+2. ~~M4 `raise SystemExit(1)`~~ FIXED: always exits 0; baseline benchmark no
+   longer skipped.
+3. ~~Baseline last-resort attach~~ FIXED: attach only if contiguous AND within
+   cap, else the room gets its own panel (3467 and 2373 baselines now valid).
+4. ~~Stale outputs~~ FIXED: full batch re-run x2; all 50 final_*.json current.
 
-## 7. Results So Far (old M2/M3, 16 plans completed of 20 smoke-tested)
+No known open bugs in the pipeline.
 
-- Optimized valid 15/16, baseline 14/16 (old M4).
-- Optimized cable < baseline in 14/14 comparable plans: mean 6.1%, max 16.1% (7607);
-  14433: 36.9 → 33.9 m. M3 runtime ~0.02 s/plan.
-- 13342 optimized now VALID with new M3. 3467 fails only on bug §6.1.
-- Sealed-room design decision: rooms with no verified portal (`unroutable_rooms`) are
-  excluded from eligible and reported separately, not failed. RATIONALE: dataset gives
-  no physical opening → unwirable by ANY solution. CAVEAT: soft interpretation of PS4
-  rule 1 — must be disclosed in final deck/README.
+## 7. Results (final batch run 2026-10-16, log: batch_run_step5.log)
+
+- 25/25 plans completed end-to-end; **optimized valid 25/25, baseline valid 25/25**.
+- Optimized cable <= baseline on ALL 25 plans: mean 5.24%, max 16.1% (7607).
+  Best: 4625 +14.8%, 2373 +14.2%, 5616 +13.9%; 14433: 36.9 -> 33.9 m.
+- M3 runtime <= 0.13 s/plan (worst: 2373). M2 dominates runtime.
+- History: old M2/M3 was 16/20 completed, 15/16 optimized valid, mean 6.1%
+  on 14 comparable plans. Gains since: capacity fix (3467), exit-code fix,
+  baseline contiguity/capacity fix (10808, 2373), cost-aware split selection
+  (3467 optimized 44.0 -> 33.5 m, now beats baseline; 2373 34.4 -> 30.6 m).
+- Sealed-room design decision: rooms with no verified portal (`unroutable_rooms`)
+  are excluded from eligible and reported separately, not failed. RATIONALE:
+  dataset gives no physical opening -> unwirable by ANY solution. CAVEAT: soft
+  interpretation of PS4 rule 1 — must be disclosed in final deck/README.
 
 ## 8. Environment (this machine)
 
@@ -100,9 +96,9 @@ SMOKE-TESTED after the abrupt agent stop: `python module3_joint_optimizer.py --p
 
 ## 10. Current Next Step
 
-1. Fix §6.1 (capacity check in find_partition) + §6.2 (M4 exit code).
-2. Batch re-run 20 plans; verify ≥ old 16/20, no regressions from new portal logic.
-3. Fix §6.3 baseline policy.
-4. Commit each step. Then stretch: bend-weighted TSP cost, 100+ plan stats,
-   final deliverables polish (PPT in repo root: Cable Ring Challenge - Intermediate
-   Update Template.pptx — team name/members still placeholder).
+1. Core pipeline is DONE and green (25/25 valid both modes). Do NOT touch M2/M3
+   core logic without re-running the batch.
+2. Stretch (optional): bend-weighted TSP cost, 100+ plan stats, final deck polish
+   (PPT in repo root — team name/members still placeholder).
+3. Documentation website (docs/ static site for GitHub Pages): NOT started —
+   awaiting explicit user approval. Build only after go-ahead.
