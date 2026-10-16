@@ -378,7 +378,7 @@ def build_local_graph(room, portals_here, ring, inset, scale, candidate_points,
     for u, v in combinations(names, 2):
         seg = LineString([nodes[u], nodes[v]])
         if segment_valid(seg, room["geometry"], walls_union, portal_union_local, eps_raw):
-            g.add_edge(u, v, weight=seg.length)
+            g.add_edge(u, v, weight=seg.length * scale)
 
     return g, nodes
 
@@ -432,7 +432,7 @@ def build_global_graph(plan, rooms, portals, scale):
                 )
                 if walls_union is None or bad.length <= 1e-9:
                     global_graph.add_edge(
-                        na, nb, weight=seg.length, portal=portal["id"]
+                        na, nb, weight=seg.length * scale, portal=portal["id"]
                     )
 
     return global_graph, rooms_graph_data, portals

@@ -75,9 +75,18 @@ Tier 2 (combinatorics, fast on matrices):
 | M1 | module1_portal_and_calibration.py | DONE (portal graph, candidate passages, calibration report) |
 | M2 | module2_wall_router_and_matrix.py | DONE + VERIFIED on plan 14433 (see notes) |
 | M2v | verify_module2.py | DONE — checks all APSP paths: 0 wall crossings, 0 window hits, inside building |
-| M3 | module3_joint_optimizer.py | NOT STARTED |
+| M3 | module3_joint_optimizer.py | DONE + run on 14433: baseline 37.5m/2 panels vs optimized 33.1m/2 panels (12% better), all loops routed |
 | M4 | module4_validator_and_blueprint.py | NOT STARTED |
 | runner | run_pipeline.py | NOT STARTED |
+
+M3 verified facts (plan 14433):
+- D-matrix weights are METRES (scale applied at graph build in M2). Matrix JSON keys: paths["i_j"], source_order entries are ['dev'|'cand_N', room_id].
+- Candidate id gotcha: src[0] is 'cand_0'/'cand_1'/... -> use startswith('cand'), never == 'cand'.
+- Contiguity: transit (non-eligible) rooms may be traversed; OTHER panels' eligible rooms may not (cluster_connected_strict(cluster, room_graph, eligible)).
+- Plan 14433 eligible graph is a STAR around living_0: the only valid 2-partition is {living,kitchen,bed_0,bed_2} + {bed_1}. find_partition tries k=k_min..1, falls back with capacity_violation_m2 flagged per panel.
+- Baseline: panel at candidate nearest cluster centroid, NN tour on Euclidean device distances.
+- Optimized: BFS region-growing split (accept as soon as both sides contiguous + within caps) + 2-opt TSP on D + Loop-First/Panel-Snap panel insertion.
+- OUTPUT: solution_{baseline,optimized}_14433.json/png. Loop coords are true routed polylines.
 
 M2 verified facts (plan 14433):
 - Calibration scale = sqrt(reported_area/inner_area) = 0.0512 m/raw-unit; door cross-check median 0.951 m (plausible). wall_depth raw = 4.5 (=0.23 m).
