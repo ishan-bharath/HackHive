@@ -241,20 +241,31 @@ def best_panel_for_tour(cluster, report, index, D):
 def find_partition(areas_m2, eligible, room_graph, loop_cost_fn):
     """Try k = k_min, k_min+1 ... (more panels can make a contiguous
     capacity-feasible split possible), then descend to smaller k as flagged
-    fallbacks. Returns (clusters, k_used, k_min, capacity_relaxed)."""
+    fallbacks. A partition is only accepted when it is contiguous AND every
+    cluster fits the panel area cap. If no capacity-feasible contiguous
+    partition exists (e.g. a single oversized component that cannot be
+    split), the best contiguous partition is returned with the violation
+    flagged. Returns (clusters, k_used, k_min, capacity_relaxed)."""
     k_min, total_area, n_comp = min_panels(areas_m2, eligible, room_graph)
     attempts = list(range(k_min, k_min + 4)) + list(range(k_min - 1, 0, -1)) + [1]
     tried = set()
+    contiguous_over = None
     for k in attempts:
         if k in tried or k < 1:
             continue
         tried.add(k)
         clusters = grow_partition(areas_m2, eligible, room_graph, k)
-        if clusters is None:
+        if clusters is None or len(clusters) != k:
             continue
-        if len(clusters) == k and \
-                all(cluster_connected_strict(c, room_graph, eligible) for c in clusters):
+        if not all(cluster_connected_strict(c, room_graph, eligible) for c in clusters):
+            continue
+        if all(sum(areas_m2[r] for r in c) <= PANEL_AREA_CAP_M2 + 1e-9
+               for c in clusters):
             return clusters, k, k_min, k < k_min
+        if contiguous_over is None:
+            contiguous_over = clusters
+    if contiguous_over is not None:
+        return contiguous_over, len(contiguous_over), k_min, True
     return [set(eligible)], 1, k_min, True
 
 
@@ -282,19 +293,27 @@ def grow_partition(areas_m2, eligible, room_graph, k):
             grown = {seed}
             frontier = [(seed, nb) for nb in room_graph.get(seed, ()) if nb in comp]
             frontier.sort(key=lambda sn: areas_m2[sn[1]])
+            relaxed = None
             while True:
                 rest = comp - grown
                 grown_area = sum(areas_m2[r] for r in grown)
                 rest_area = comp_area - grown_area
                 if rest and \
-                        grown_area <= PANEL_AREA_CAP_M2 + 1e-9 and \
-                        rest_area <= PANEL_AREA_CAP_M2 + 1e-9 and \
                         cluster_connected_strict(grown, room_graph, eligible) and \
                         cluster_connected_strict(rest, room_graph, eligible):
-                    clusters[big] = grown
-                    clusters.append(rest)
-                    placed = True
-                    break
+                    if grown_area <= PANEL_AREA_CAP_M2 + 1e-9 and \
+                            rest_area <= PANEL_AREA_CAP_M2 + 1e-9:
+                        clusters[big] = grown
+                        clusters.append(rest)
+                        placed = True
+                        break
+                    # Capacity-infeasible split: keep the first one where at
+                    # least the smaller side fits; the oversized side may be
+                    # split again when more clusters are needed.
+                    if relaxed is None and (
+                            grown_area <= PANEL_AREA_CAP_M2 + 1e-9 or
+                            rest_area <= PANEL_AREA_CAP_M2 + 1e-9):
+                        relaxed = (set(grown), set(rest))
                 if not frontier:
                     break
                 _, nb = frontier.pop(0)
@@ -306,6 +325,11 @@ def grow_partition(areas_m2, eligible, room_graph, k):
                         frontier.append((nb, nb2))
                 frontier.sort(key=lambda sn: areas_m2[sn[1]])
             if placed:
+                break
+            if relaxed is not None:
+                clusters[big] = relaxed[0]
+                clusters.append(relaxed[1])
+                placed = True
                 break
         if not placed:
             return None
