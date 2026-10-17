@@ -337,6 +337,7 @@ def render_blueprint(plan, solution, validation, scale, out_png, out=None):
         ax.fill(xs, ys, facecolor="#2B2B2B", edgecolor="#111111", lw=0.4)
 
     palette = ["#C0392B", "#2471A3", "#1E8449", "#7D3C98", "#CA6F1E"]
+    n_base = 0
     for k, panel in enumerate(solution["panels"]):
         color = palette[k % len(palette)]
         for rid in panel["assigned_rooms"]:
@@ -360,22 +361,26 @@ def render_blueprint(plan, solution, validation, scale, out_png, out=None):
             px, py = panel["panel_position"]
             ax.plot(px, py, marker="*", markersize=260 / fig.dpi * 3,
                     markerfacecolor=color, markeredgecolor="#111111", zorder=7)
-            ax.text(px, py, f"  P{k+1}", fontsize=10, fontweight="bold",
+            ax.text(px, py, f"  H{k+1}", fontsize=10, fontweight="bold",
                     color="#111111", zorder=8)
-        # Visitation numbers: badge i at the i-th device pull point in
-        # device_order; the panel (P#) is the loop start/end.
-        visit_no = {rid: i + 1
-                    for i, rid in enumerate(panel.get("device_order") or [])}
-        for rid in panel["assigned_rooms"]:
+        # Node ID badges: N1.. across the whole plan, numbered in visiting
+        # order (hub by hub), matching export_submission.py's assigned_nodes.
+        for j, rid in enumerate(panel.get("device_order") or []):
+            nid = f"N{n_base + j + 1}"
             d = rooms[rid]["device_point"]
             ax.plot(d.x, d.y, marker="s", markersize=6, color=color,
                     markeredgecolor="#111111", zorder=6)
-            n = visit_no.get(rid)
-            if n is not None:
-                ax.text(d.x, d.y, str(n), fontsize=6.5, fontweight="bold",
-                        ha="center", va="center", color="#111111", zorder=9,
-                        bbox=dict(boxstyle="circle,pad=0.22",
-                                  facecolor="#FFFFFF", edgecolor=color, lw=1.1))
+            ax.text(d.x, d.y, nid, fontsize=5.5, fontweight="bold",
+                    ha="center", va="center", color="#111111", zorder=9,
+                    bbox=dict(boxstyle="round,pad=0.22",
+                              facecolor="#FFFFFF", edgecolor=color, lw=1.0))
+        n_base += len(panel.get("device_order") or [])
+        for rid in panel["assigned_rooms"]:
+            if rid in (panel.get("device_order") or []):
+                continue
+            d = rooms[rid]["device_point"]
+            ax.plot(d.x, d.y, marker="s", markersize=6, color=color,
+                    markeredgecolor="#111111", zorder=6)
 
     for pp in validation["physics"]["nfpa72_classX_pinch_points"]:
         if pp["type"].startswith("unavoidable"):
@@ -388,21 +393,32 @@ def render_blueprint(plan, solution, validation, scale, out_png, out=None):
 
     ax.set_aspect("equal", adjustable="box")
     ax.axis("off")
-    # Legend: symbols, route semantics, visitation numbering.
+    # Failed validation: draw the violations in red on the image itself.
+    if not validation["all_valid"] and validation["violations"]:
+        lines = ["VIOLATIONS (design invalid):"]
+        lines += [f"- {v}" for v in validation["violations"][:6]]
+        if len(validation["violations"]) > 6:
+            lines.append(f"- ... +{len(validation['violations']) - 6} more")
+        ax.text(0.01, 0.99, "\n".join(lines), transform=ax.transAxes,
+                fontsize=9, fontweight="bold", color="#C0392B",
+                va="top", ha="left", zorder=10,
+                bbox=dict(boxstyle="round,pad=0.4", facecolor="#FDEDEC",
+                          edgecolor="#C0392B", lw=1.2, alpha=0.92))
+    # Legend: symbols, route semantics, visiting order.
     handles = [
         Line2D([], [], marker="*", ls="none", markersize=13,
                markerfacecolor="#666666", markeredgecolor="#111111",
-               label="Control panel  P# (loop start/end)"),
+               label="Hub  H# (ring start/end)"),
         Line2D([], [], marker="s", ls="none", markersize=8,
                markerfacecolor="#666666", markeredgecolor="#111111",
-               label="Device - numbered badge = visit order (1, 2, ...)"),
+               label="Node N# - visiting order, matches the submission JSON"),
         Line2D([], [], color="#666666", lw=2.2,
                label="Cable loop (closed, non-branching, through portals only)"),
         Line2D([], [], marker="X", ls="none", markersize=9, color="#FF8C00",
                label="Unavoidable doorway pinch point (NFPA 72 Class X)"),
     ]
     handles += [Patch(facecolor=c, alpha=0.35, edgecolor=c,
-                      label=f"Panel {i+1} territory (rooms served)")
+                      label=f"Hub {i+1} territory (rooms served)")
                 for i, c in enumerate(palette[:len(solution["panels"])])]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.01),
               ncol=3, fontsize=8, framealpha=0.92, title="LEGEND",
@@ -410,7 +426,7 @@ def render_blueprint(plan, solution, validation, scale, out_png, out=None):
     metrics = solution["metrics"]
     title = (
         f"PS4 Solution Blueprint - plan {solution['plan_id']} ({solution['mode']})\n"
-        f"panels: {metrics['panel_count']} | cable: {metrics['total_cable_length_m']} m | "
+        f"hubs: {metrics['panel_count']} | cable: {metrics['total_cable_length_m']} m | "
         f"bends: {metrics['total_bends']} | "
         f"validator: {'PASS' if validation['all_valid'] else 'FAIL'}"
     )

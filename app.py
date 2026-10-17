@@ -389,7 +389,7 @@ RESULT_PAGE = """
 <div class="card">
 <h2>Optimized blueprint</h2>
 <img class="blueprint" src="data:image/png;base64,{{ img_opt }}" alt="optimized blueprint">
-<p class="note">Legend: numbered badges = device visitation order; P# = panel (loop start/end);
+<p class="note">Legend: node badges N# = visiting order (matches the submission JSON); H# = hub (ring start/end);
 arrow = loop direction; orange X = unavoidable doorway pinch point.</p>
 </div>
 
