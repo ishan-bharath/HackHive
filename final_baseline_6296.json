@@ -1,107 +1,72 @@
 {
   "plan_id": "6296",
   "mode": "baseline",
-  "scale_m_per_raw": 0.06196962553879308,
+  "scale_m_per_raw": 0.08341755836135385,
   "solution": {
     "plan_id": "6296",
     "mode": "baseline",
     "panels": [
       {
-        "panel_room": "bedroom_1",
+        "panel_room": "kitchen_0",
         "panel_position": [
-          127.246,
-          134.753
+          174.497,
+          136.848
         ],
         "assigned_rooms": [
-          "bedroom_0",
           "bedroom_1",
           "kitchen_0",
           "living_0"
         ],
-        "assigned_area_m2": 61.34,
+        "assigned_area_m2": 82.54,
         "device_order": [
-          "bedroom_1",
-          "bedroom_0",
           "kitchen_0",
-          "living_0"
+          "living_0",
+          "bedroom_1"
         ],
         "loop_source_indices": [
-          34,
-          3,
-          2,
+          22,
           1,
           0,
-          34
+          3,
+          22
         ],
-        "loop_length_m": 33.621,
-        "loop_bends": 8,
+        "loop_length_m": 37.604,
+        "loop_bends": 24,
         "loop_coords": [
           [
-            127.25,
-            134.75
+            174.5,
+            136.85
           ],
           [
-            103.88,
-            133.44
-          ],
-          [
-            118.91,
-            104.59
-          ],
-          [
-            118.91,
-            100.33
-          ],
-          [
-            113.57,
-            93.82
-          ],
-          [
-            108.25,
-            93.82
-          ],
-          [
-            72.38,
-            100.33
-          ],
-          [
-            48.54,
-            126.17
-          ],
-          [
-            72.38,
-            100.33
-          ],
-          [
-            108.25,
-            93.82
-          ],
-          [
-            113.57,
-            93.82
-          ],
-          [
-            163.75,
-            100.33
-          ],
-          [
-            192.93,
-            124.33
-          ],
-          [
-            192.93,
-            126.46
+            181.21,
+            136.85
           ],
           [
             181.21,
             146.24
           ],
           [
-            192.93,
+            181.21,
+            131.09
+          ],
+          [
+            187.97,
+            131.09
+          ],
+          [
+            195.18,
+            131.09
+          ],
+          [
+            195.18,
             126.46
           ],
           [
-            195.51,
+            195.18,
+            124.33
+          ],
+          [
+            228.3,
             124.33
           ],
           [
@@ -109,20 +74,157 @@
             127.53
           ],
           [
-            163.75,
+            228.3,
+            125.4
+          ],
+          [
+            206.3,
+            125.4
+          ],
+          [
+            205.66,
+            125.4
+          ],
+          [
+            205.66,
+            124.2
+          ],
+          [
+            205.66,
             100.33
           ],
           [
-            121.49,
+            121.16,
             100.33
           ],
           [
-            121.49,
+            119.24,
+            100.33
+          ],
+          [
+            119.24,
             104.59
           ],
           [
-            127.25,
-            134.75
+            119.24,
+            106.03
+          ],
+          [
+            113.57,
+            106.03
+          ],
+          [
+            103.88,
+            106.03
+          ],
+          [
+            103.88,
+            133.44
+          ],
+          [
+            119.24,
+            133.44
+          ],
+          [
+            119.24,
+            104.59
+          ],
+          [
+            119.24,
+            100.33
+          ],
+          [
+            163.26,
+            100.33
+          ],
+          [
+            163.26,
+            111.95
+          ],
+          [
+            163.26,
+            123.96
+          ],
+          [
+            193.26,
+            123.96
+          ],
+          [
+            193.26,
+            124.33
+          ],
+          [
+            193.26,
+            126.46
+          ],
+          [
+            193.26,
+            130.77
+          ],
+          [
+            188.74,
+            130.77
+          ],
+          [
+            188.74,
+            131.09
+          ],
+          [
+            187.97,
+            131.09
+          ],
+          [
+            187.97,
+            136.85
+          ],
+          [
+            174.5,
+            136.85
+          ]
+        ],
+        "loop_valid": true,
+        "capacity_violation_m2": 0.0
+      },
+      {
+        "panel_room": "bedroom_0",
+        "panel_position": [
+          53.264,
+          144.279
+        ],
+        "assigned_rooms": [
+          "bedroom_0"
+        ],
+        "assigned_area_m2": 28.6,
+        "device_order": [
+          "bedroom_0"
+        ],
+        "loop_source_indices": [
+          26,
+          2,
+          26
+        ],
+        "loop_length_m": 3.81,
+        "loop_bends": 3,
+        "loop_coords": [
+          [
+            53.26,
+            144.28
+          ],
+          [
+            48.54,
+            144.28
+          ],
+          [
+            48.54,
+            126.17
+          ],
+          [
+            48.54,
+            144.28
+          ],
+          [
+            53.26,
+            144.28
           ]
         ],
         "loop_valid": true,
@@ -131,12 +233,12 @@
     ],
     "metrics": {
       "unroutable_rooms": [],
-      "panel_count": 1,
+      "panel_count": 2,
       "devices_total": 4,
-      "total_cable_length_m": 33.621,
-      "total_bends": 8,
+      "total_cable_length_m": 41.414,
+      "total_bends": 27,
       "all_loops_routed": true,
-      "runtime_s": 0.022
+      "runtime_s": 0.016
     }
   },
   "validation": {
@@ -144,6 +246,8 @@
       "assignment_complete": true,
       "capacity": true,
       "contiguity": true,
+      "hub_clearance": true,
+      "axis_aligned": true,
       "closed_loops": true,
       "physical_routes": true,
       "legal_transitions": true
@@ -165,15 +269,6 @@
         {
           "panel": 0,
           "room_pair": [
-            "bedroom_0",
-            "living_0"
-          ],
-          "uses": 2,
-          "type": "unavoidable (dead-end)"
-        },
-        {
-          "panel": 0,
-          "room_pair": [
             "kitchen_0",
             "living_0"
           ],
@@ -181,14 +276,27 @@
           "type": "unavoidable (dead-end)"
         }
       ],
-      "nec_bend_violations": [],
+      "nec_bend_violations": [
+        {
+          "panel": 0,
+          "max_bends_between_pulls": 6
+        }
+      ],
       "voltage_drop_24v": [
         {
           "panel": 0,
-          "loop_length_m": 33.621,
-          "loop_resistance_ohm": 0.706,
-          "current_a": 0.018,
-          "voltage_drop_v": 0.0127,
+          "loop_length_m": 37.605,
+          "loop_resistance_ohm": 0.79,
+          "current_a": 0.016,
+          "voltage_drop_v": 0.0126,
+          "within_limit": true
+        },
+        {
+          "panel": 1,
+          "loop_length_m": 3.809,
+          "loop_resistance_ohm": 0.08,
+          "current_a": 0.012,
+          "voltage_drop_v": 0.001,
           "within_limit": true
         }
       ]

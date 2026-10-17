@@ -1,7 +1,7 @@
 {
   "plan_id": "624783",
   "mode": "optimized",
-  "scale_m_per_raw": 0.0509254858470638,
+  "scale_m_per_raw": 0.06355039793702115,
   "solution": {
     "plan_id": "624783",
     "mode": "optimized",
@@ -9,131 +9,219 @@
       {
         "panel_room": "living_0",
         "panel_position": [
-          137.321,
-          121.464
+          101.901,
+          136.394
         ],
         "assigned_rooms": [
-          "bedroom_0",
-          "bedroom_1",
           "bedroom_2",
           "kitchen_0",
           "living_0"
         ],
-        "assigned_area_m2": 84.39,
+        "assigned_area_m2": 87.63,
         "device_order": [
-          "bedroom_1",
-          "bedroom_0",
-          "kitchen_0",
+          "bedroom_2",
           "living_0",
-          "bedroom_2"
+          "kitchen_0"
         ],
         "loop_source_indices": [
-          12,
-          3,
-          2,
-          1,
-          0,
+          15,
           4,
-          12
+          0,
+          1,
+          15
         ],
-        "loop_length_m": 26.303,
-        "loop_bends": 6,
+        "loop_length_m": 21.022,
+        "loop_bends": 15,
         "loop_coords": [
           [
-            137.32,
-            121.46
-          ],
-          [
-            139.68,
-            112.44
-          ],
-          [
-            143.23,
-            109.29
-          ],
-          [
-            182.83,
-            85.99
-          ],
-          [
-            143.23,
-            109.29
-          ],
-          [
-            139.68,
-            109.29
-          ],
-          [
-            132.36,
-            94.62
-          ],
-          [
-            129.22,
-            91.06
-          ],
-          [
-            107.69,
-            50.95
-          ],
-          [
-            129.22,
-            91.06
-          ],
-          [
-            129.22,
-            94.62
-          ],
-          [
-            117.34,
-            125.41
-          ],
-          [
-            93.35,
-            153.47
-          ],
-          [
-            91.57,
-            153.47
-          ],
-          [
-            63.01,
-            155.04
-          ],
-          [
-            91.57,
-            156.61
-          ],
-          [
-            93.35,
-            156.61
-          ],
-          [
-            120.73,
-            155.04
+            101.9,
+            136.39
           ],
           [
             148.31,
-            133.25
+            136.39
+          ],
+          [
+            148.31,
+            132.94
           ],
           [
             151.86,
-            133.25
+            132.94
+          ],
+          [
+            151.86,
+            139.42
+          ],
+          [
+            153.53,
+            139.42
+          ],
+          [
+            182.45,
+            139.42
           ],
           [
             182.45,
             155.54
           ],
           [
+            182.45,
+            138.85
+          ],
+          [
+            153.06,
+            138.85
+          ],
+          [
             151.86,
-            133.25
+            138.85
+          ],
+          [
+            151.86,
+            132.94
           ],
           [
             148.31,
-            130.11
+            132.94
           ],
           [
-            137.32,
-            121.46
+            120.73,
+            132.94
+          ],
+          [
+            120.73,
+            155.04
+          ],
+          [
+            120.73,
+            156.29
+          ],
+          [
+            93.35,
+            156.29
+          ],
+          [
+            91.57,
+            156.29
+          ],
+          [
+            63.01,
+            156.29
+          ],
+          [
+            63.01,
+            155.04
+          ],
+          [
+            63.01,
+            153.78
+          ],
+          [
+            91.57,
+            153.78
+          ],
+          [
+            93.35,
+            153.78
+          ],
+          [
+            93.35,
+            136.39
+          ],
+          [
+            101.9,
+            136.39
+          ]
+        ],
+        "loop_valid": true,
+        "capacity_violation_m2": 0.0
+      },
+      {
+        "panel_room": "bedroom_1",
+        "panel_position": [
+          179.168,
+          110.054
+        ],
+        "assigned_rooms": [
+          "bedroom_1"
+        ],
+        "assigned_area_m2": 22.26,
+        "device_order": [
+          "bedroom_1"
+        ],
+        "loop_source_indices": [
+          31,
+          3,
+          31
+        ],
+        "loop_length_m": 3.524,
+        "loop_bends": 3,
+        "loop_coords": [
+          [
+            179.17,
+            110.05
+          ],
+          [
+            182.83,
+            110.05
+          ],
+          [
+            182.83,
+            85.99
+          ],
+          [
+            182.83,
+            110.05
+          ],
+          [
+            179.17,
+            110.05
+          ]
+        ],
+        "loop_valid": true,
+        "capacity_violation_m2": 0.0
+      },
+      {
+        "panel_room": "bedroom_0",
+        "panel_position": [
+          85.147,
+          45.39
+        ],
+        "assigned_rooms": [
+          "bedroom_0"
+        ],
+        "assigned_area_m2": 21.54,
+        "device_order": [
+          "bedroom_0"
+        ],
+        "loop_source_indices": [
+          25,
+          2,
+          25
+        ],
+        "loop_length_m": 3.572,
+        "loop_bends": 3,
+        "loop_coords": [
+          [
+            85.15,
+            45.39
+          ],
+          [
+            107.69,
+            45.39
+          ],
+          [
+            107.69,
+            50.95
+          ],
+          [
+            107.69,
+            45.39
+          ],
+          [
+            85.15,
+            45.39
           ]
         ],
         "loop_valid": true,
@@ -141,16 +229,16 @@
       }
     ],
     "metrics": {
-      "k_min_theoretical": 1,
-      "k_used": 1,
+      "k_min_theoretical": 2,
+      "k_used": 3,
       "capacity_relaxed": false,
       "unroutable_rooms": [],
-      "panel_count": 1,
+      "panel_count": 3,
       "devices_total": 5,
-      "total_cable_length_m": 26.303,
-      "total_bends": 6,
+      "total_cable_length_m": 28.118,
+      "total_bends": 21,
       "all_loops_routed": true,
-      "runtime_s": 0.075
+      "runtime_s": 0.078
     }
   },
   "validation": {
@@ -158,6 +246,8 @@
       "assignment_complete": true,
       "capacity": true,
       "contiguity": true,
+      "hub_clearance": true,
+      "axis_aligned": true,
       "closed_loops": true,
       "physical_routes": true,
       "legal_transitions": true
@@ -167,24 +257,6 @@
     "dataset_sealed_rooms": [],
     "physics": {
       "nfpa72_classX_pinch_points": [
-        {
-          "panel": 0,
-          "room_pair": [
-            "bedroom_0",
-            "living_0"
-          ],
-          "uses": 2,
-          "type": "unavoidable (dead-end)"
-        },
-        {
-          "panel": 0,
-          "room_pair": [
-            "bedroom_1",
-            "living_0"
-          ],
-          "uses": 2,
-          "type": "unavoidable (dead-end)"
-        },
         {
           "panel": 0,
           "room_pair": [
@@ -208,10 +280,26 @@
       "voltage_drop_24v": [
         {
           "panel": 0,
-          "loop_length_m": 26.303,
-          "loop_resistance_ohm": 0.552,
-          "current_a": 0.02,
-          "voltage_drop_v": 0.011,
+          "loop_length_m": 21.021,
+          "loop_resistance_ohm": 0.441,
+          "current_a": 0.016,
+          "voltage_drop_v": 0.0071,
+          "within_limit": true
+        },
+        {
+          "panel": 1,
+          "loop_length_m": 3.523,
+          "loop_resistance_ohm": 0.074,
+          "current_a": 0.012,
+          "voltage_drop_v": 0.0009,
+          "within_limit": true
+        },
+        {
+          "panel": 2,
+          "loop_length_m": 3.572,
+          "loop_resistance_ohm": 0.075,
+          "current_a": 0.012,
+          "voltage_drop_v": 0.0009,
           "within_limit": true
         }
       ]
