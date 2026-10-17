@@ -1,4 +1,4 @@
-﻿# Honeywell HackHive — PS4
+﻿# Honeywell HackHive (Problem Statement 4) 
 
 Joint optimization of hub placement and closed-ring cable routing
 (Honeywell HackHive, problem statement PS4).
