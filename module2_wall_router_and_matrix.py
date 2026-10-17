@@ -99,16 +99,26 @@ def count_bends(coords):
 # ------------------------------------------------------------------
 
 def calibrate(plan):
-    """Primary scale: door-width calibration (door clear width ~0.85 m is a
-    reliable physical constant; ResPlan area metadata is unreliable -
-    5,458/17,000 plans have bad net_area). Fallback: area-based scale.
-    Both are reported for cross-checking."""
+    """Official PS4 scale (slide 4): scale_units_per_m = sqrt(inner.area /
+    plan['area']), i.e. scale_m_per_raw = 1 / that. The median door width is
+    computed only as a printed sanity cross-check. net_area is NEVER used
+    (0 in 32% of plans)."""
     inner = largest(plan.get("inner"))
-    reported = plan.get("area") or plan.get("net_area")
     if inner is None:
         raise ValueError("Cannot calibrate: missing inner geometry.")
 
-    area_scale = math.sqrt(float(reported) / inner.area) if reported else None
+    area_val = plan.get("area")
+    if area_val is None:
+        raise ValueError(
+            "Official scale requires plan['area'] (floor area in m^2); "
+            "this plan has none and net_area must not be used.")
+    area_val = float(area_val)
+    if area_val <= 0:
+        raise ValueError(
+            f"Official scale requires plan['area'] > 0; got {area_val}.")
+
+    units_per_m = math.sqrt(inner.area / area_val)
+    scale = 1.0 / units_per_m
 
     door_widths_raw = []
     for d in parts(plan.get("door")):
@@ -118,27 +128,15 @@ def calibrate(plan):
         door_widths_raw.append(max(e1, e2))
     med_door_raw = float(np.median(door_widths_raw)) if door_widths_raw else None
 
-    if med_door_raw:
-        door_scale = common.NOMINAL_DOOR_WIDTH_M / med_door_raw
-    else:
-        door_scale = None
-    area_door_check = (
-        med_door_raw * area_scale if (med_door_raw and area_scale) else None
-    )
-
-    if door_scale is not None:
-        scale, method = door_scale, "door_width"
-    elif area_scale:
-        scale, method = area_scale, "reported_area"
-    else:
-        raise ValueError("Cannot calibrate: no doors and no area metadata.")
+    door_scale = common.NOMINAL_DOOR_WIDTH_M / med_door_raw if med_door_raw else None
+    area_door_check = med_door_raw * scale if med_door_raw else None
 
     return {
         "scale_m_per_raw": scale,
-        "method": method,
-        "reported_area_m2": float(reported) if reported else None,
+        "units_per_m": units_per_m,
+        "method": "official_inner_area_ratio",
+        "reported_area_m2": area_val,
         "inner_area_raw": inner.area,
-        "area_based_scale": area_scale,
         "door_based_scale": door_scale,
         "median_door_width_m": med_door_raw * scale if med_door_raw else None,
         "area_implied_door_width_m": area_door_check,
@@ -425,10 +423,15 @@ def segment_valid(seg, room_geom, walls_union, portal_union_local, eps_raw):
 
 def build_local_graph(room, portals_here, ring, inset, scale, candidate_points,
                       walls_union):
-    """Nodes: device point, portal pins, ring vertices, panel candidates.
-    Edges must stay inside the room's open floor (room minus walls) plus the
-    room's own portal openings - wall bands are excluded, so a segment can
-    never cut through a wall or slip into a neighbouring room."""
+    """Nodes: device point, portal pins, ring vertices, panel candidates,
+    plus L-bend corner nodes. ALL edges are axis-aligned (official PS4 rule 5:
+    cable runs only horizontally or vertically):
+      - node pairs that already share x or y get a straight edge when covered;
+      - every other pair is connected via an L-shaped 2-leg path through a
+        bend node at the corner; both orientations are tried and BOTH legs
+        must be covered by the room's free area, else the pair gets no edge
+        (Dijkstra routes around via other neighbours).
+    Edge weight = leg length (manhattan) * scale."""
     gid = room["id"]
     g = nx.Graph()
 
@@ -469,13 +472,76 @@ def build_local_graph(room, portals_here, ring, inset, scale, candidate_points,
         nodes[nid] = pos
         g.add_node(nid, pos=pos, kind="candidate")
 
+    # Shared bend-node registry: corners are deduped by position so many
+    # L-paths reuse the same rectification vertex.
+    bend_pos = {}
+
+    def bend_node(pos):
+        key = (round(pos[0], 4), round(pos[1], 4))
+        if key not in bend_pos:
+            nid = (f"bend_{len(bend_pos)}", gid)
+            bend_pos[key] = nid
+            nodes[nid] = pos
+            g.add_node(nid, pos=pos, kind="bend")
+        return bend_pos[key]
+
+    def covered_leg(p, q):
+        return LineString([p, q]) if free_area.covers(LineString([p, q])) else None
+
+    def add_leg(p, q, ua, va):
+        seg = covered_leg(p, q)
+        if seg is None:
+            return False
+        if seg.length >= 1e-9:
+            g.add_edge(ua, va, weight=seg.length * scale)
+        return True
+
     names = list(nodes)
     for u, v in combinations(names, 2):
-        seg = LineString([nodes[u], nodes[v]])
-        if seg.length < 1e-9 or free_area.covers(seg):
-            g.add_edge(u, v, weight=seg.length * scale)
+        pu, pv = nodes[u], nodes[v]
+        dx, dy = pv[0] - pu[0], pv[1] - pu[1]
+        if abs(dx) < 1e-9 or abs(dy) < 1e-9:
+            # Already axis-aligned: straight edge when covered.
+            add_leg(pu, pv, u, v)
+        else:
+            # L-shape through a corner bend node; try both orientations.
+            for corner in ((pu[0], pv[1]), (pv[0], pu[1])):
+                leg1 = covered_leg(pu, corner)
+                leg2 = covered_leg(corner, pv)
+                if leg1 is not None and leg2 is not None:
+                    c = bend_node(corner)
+                    if leg1.length >= 1e-9:
+                        g.add_edge(u, c, weight=leg1.length * scale)
+                    if leg2.length >= 1e-9:
+                        g.add_edge(c, v, weight=leg2.length * scale)
+                    break
+
+    # Drop bend nodes that never got connected (failed L attempts).
+    for nid in [n for n, d in g.nodes(data=True) if d.get("kind") == "bend"]:
+        if g.degree(nid) == 0:
+            g.remove_node(nid)
+            nodes.pop(nid, None)
 
     return g, nodes
+
+
+def hub_candidates_inset(room, scale, walls_union):
+    """Inset polygon for panel-candidate generation: official rule 6 requires
+    the hub at least 0.5 m from walls, so candidates are sampled on an inset
+    of 0.6 m (with shrinking fallbacks down to just above the 0.5 m minimum).
+    Returns None when even the minimum clearance cannot be met."""
+    base = room["geometry"]
+    if walls_union is not None:
+        base = base.difference(walls_union)
+    for clearance in (common.HUB_CLEARANCE_M, 0.55, common.HUB_MIN_CLEARANCE_M + 0.005):
+        inset = base.buffer(-clearance / scale)
+        if inset.is_empty:
+            continue
+        inset = largest(inset)
+        if inset is not None and inset.geom_type == "Polygon" \
+                and inset.exterior.length > 4 * clearance / scale:
+            return inset
+    return None
 
 
 def build_global_graph(plan, rooms, portals, scale):
@@ -498,7 +564,8 @@ def build_global_graph(plan, rooms, portals, scale):
 
     for rid, room in rooms.items():
         inset, ring = raceway_ring(room, scale, walls_union)
-        cands_here = panel_candidates(rid, inset, scale)
+        hub_inset = hub_candidates_inset(room, scale, walls_union)
+        cands_here = panel_candidates(rid, hub_inset, scale)
         if not cands_here:
             free = room["geometry"].difference(walls_union) if walls_union is not None \
                 else room["geometry"]
@@ -519,27 +586,60 @@ def build_global_graph(plan, rooms, portals, scale):
         global_graph.add_nodes_from(local.nodes(data=True))
         global_graph.add_edges_from(local.edges(data=True))
 
-    # Portal crossing edges: every pin pair across the opening. The part of
-    # the crossing that overlaps walls must lie inside the opening (with a
-    # small tolerance for dataset door/wall misalignment).
+    # Portal crossing edges: every pin pair across the opening, AXIS-ALIGNED.
+    # A straight crossing is used only when the pins share x or y; otherwise
+    # an L-bend node is inserted inside the opening polygon (both corner
+    # orientations tried). The part of any leg overlapping walls must lie
+    # inside the opening (small tolerance for dataset door/wall misalignment).
     crossing_tol = 0.15 / scale
+    portal_cross_bends = {}
     for portal in portals:
         a, b = portal["rooms"]
         pa, pb = portal["pins"][a], portal["pins"][b]
         opening = portal["polygon"].buffer(crossing_tol)
+
+        def wall_free(seg):
+            if walls_union is None:
+                return True
+            bad = seg.intersection(walls_union).difference(opening)
+            return bad is None or bad.is_empty or bad.length <= 1e-9
+
+        def cross_bend(pos, tag):
+            key = (portal["id"], round(pos[0], 4), round(pos[1], 4))
+            if key not in portal_cross_bends:
+                nid = (f"xpin_{portal['id']}_{tag}", "cross")
+                portal_cross_bends[key] = nid
+                global_graph.add_node(nid, pos=pos, kind="bend")
+            return portal_cross_bends[key]
+
         for i in (1, 2):
             for j in (1, 2):
                 na = (f"pin_{portal['id']}_{i}", a)
                 nb = (f"pin_{portal['id']}_{j}", b)
-                seg = LineString([pa[i], pb[j]])
-                bad = (
-                    seg.intersection(walls_union).difference(opening)
-                    if walls_union is not None else None
-                )
-                if walls_union is None or bad.length <= 1e-9:
-                    global_graph.add_edge(
-                        na, nb, weight=seg.length * scale, portal=portal["id"]
-                    )
+                pu, pv = pa[i], pb[j]
+                dx, dy = pv[0] - pu[0], pv[1] - pu[1]
+                if abs(dx) < 1e-9 or abs(dy) < 1e-9:
+                    seg = LineString([pu, pv])
+                    if wall_free(seg):
+                        global_graph.add_edge(
+                            na, nb, weight=seg.length * scale,
+                            portal=portal["id"]
+                        )
+                    continue
+                for corner in ((pu[0], pv[1]), (pv[0], pu[1])):
+                    seg1 = LineString([pu, corner])
+                    seg2 = LineString([corner, pv])
+                    if wall_free(seg1) and wall_free(seg2):
+                        c = cross_bend(corner, f"{i}{j}_{len(portal_cross_bends)}")
+                        if seg1.length >= 1e-9:
+                            global_graph.add_edge(
+                                na, c, weight=seg1.length * scale,
+                                portal=portal["id"])
+                        if seg2.length >= 1e-9:
+                            global_graph.add_edge(
+                                c, nb, weight=seg2.length * scale,
+                                portal=portal["id"])
+                        break
 
     return global_graph, rooms_graph_data, portals
 
@@ -648,9 +748,10 @@ def main():
     cal = calibrate(plan)
     scale = cal["scale_m_per_raw"]
 
-    print(f"Plan {args.plan_id} | scale {scale:.4f} m/raw-unit ({cal['method']}) | "
-          f"median door width {cal['median_door_width_m'] and round(cal['median_door_width_m'], 3)} m | "
-          f"area-implied door {cal['area_implied_door_width_m'] and round(cal['area_implied_door_width_m'], 3)} m")
+    print(f"Plan {args.plan_id} | official scale {scale:.4f} m/raw-unit "
+          f"({cal['method']}) | door-width sanity check: median door "
+          f"{cal['median_door_width_m'] and round(cal['median_door_width_m'], 3)} m "
+          f"(area-implied {cal['area_implied_door_width_m'] and round(cal['area_implied_door_width_m'], 3)} m)")
 
     rooms = extract_rooms(plan)
     eligible_ids = [rid for rid, r in rooms.items() if r["eligible"]]

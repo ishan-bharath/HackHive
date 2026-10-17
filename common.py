@@ -30,6 +30,11 @@ WIRE_OHMS_PER_M_18AWG = 0.021
 SUPPLY_VOLTAGE_V = 24.0
 MAX_VOLTAGE_DROP_V = 3.0
 
+# Official PS4 rule 6: hub point at least 0.5 m from walls. Candidates are
+# generated with a slightly larger 0.6 m inset for tolerance margin.
+HUB_CLEARANCE_M = 0.6
+HUB_MIN_CLEARANCE_M = 0.5
+
 _PLAN_CACHE = None
 
 

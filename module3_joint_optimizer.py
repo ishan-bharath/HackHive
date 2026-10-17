@@ -12,7 +12,7 @@ Consumes the module 2 matrix report. Two modes:
                candidate position whose insertion into the best tour edge adds
                the least cable.
 
-Hard constraints enforced: panel capacity (100 m^2, 20 devices), contiguous
+Hard constraints enforced: panel capacity (100 m^2, 5 nodes), contiguous
 territories (on the verified portal room graph), every eligible room assigned
 to exactly one panel, one closed loop per panel visiting each device exactly
 once. Both modes are measured with the SAME true indoor routed lengths, so the
@@ -36,7 +36,7 @@ import common
 import module2_wall_router_and_matrix as m2
 
 PANEL_AREA_CAP_M2 = 100.0
-PANEL_DEVICE_CAP = 20
+PANEL_DEVICE_CAP = 5
 
 TSP_IMPROVE_PASSES = 60
 

@@ -6,7 +6,7 @@ trust module 2/3 bookkeeping: it re-extracts rooms and portals, re-measures
 every loop polyline, and checks all PS4 hard constraints:
 
   1. Device placement - exactly one device per eligible room, inside the room.
-  2. Panel capacity   - max 100 m^2 eligible area and 20 devices per panel.
+  2. Panel capacity   - max 100 m^2 eligible area and 5 nodes per hub.
   3. Assignment       - every eligible room assigned to exactly one panel.
   4. Contiguity       - each panel's rooms connected via passages (transit
                         rooms may be traversed; other panels' rooms may not).
@@ -124,9 +124,9 @@ def validate(plan, solution, scale):
             violations.append(
                 f"panel {i} area {area:.2f} m^2 exceeds 100 m^2"
             )
-        if len(panel["assigned_rooms"]) > 20:
+        if len(panel["assigned_rooms"]) > 5:
             area_cap_ok = False
-            violations.append(f"panel {i} serves more than 20 devices")
+            violations.append(f"panel {i} serves more than 5 nodes")
     checks["capacity"] = area_cap_ok
 
     # 4: contiguity.
@@ -149,6 +149,48 @@ def validate(plan, solution, scale):
             contiguous = False
             violations.append(f"panel {i} territory not contiguous")
     checks["contiguity"] = contiguous
+
+    # 4b: hub clearance - official rule 6: the hub point sits inside an
+    # eligible room assigned to that hub, at least 0.5 m from walls.
+    hub_ok = True
+    for i, panel in enumerate(solution["panels"]):
+        pos = panel.get("panel_position")
+        rid = panel.get("panel_room")
+        if not pos or rid not in rooms:
+            hub_ok = False
+            violations.append(f"panel {i} has no hub position in a known room")
+            continue
+        pt = Point(pos)
+        if not rooms[rid]["geometry"].covers(pt):
+            hub_ok = False
+            violations.append(f"panel {i} hub outside its assigned room {rid}")
+            continue
+        clearance_raw = rooms[rid]["geometry"].boundary.distance(pt)
+        if walls is not None and not walls.is_empty:
+            local_walls = walls.intersection(
+                rooms[rid]["geometry"].buffer(0.5 / scale))
+            if not local_walls.is_empty:
+                clearance_raw = min(clearance_raw, local_walls.distance(pt))
+        clearance_m = clearance_raw * scale
+        if clearance_m < common.HUB_MIN_CLEARANCE_M - 1e-6:
+            hub_ok = False
+            violations.append(
+                f"panel {i} hub clearance {clearance_m:.3f} m < 0.5 m from walls"
+            )
+    checks["hub_clearance"] = hub_ok
+
+    # 5b: axis-aligned routing - every polyline segment horizontal or
+    # vertical (official rule 5, 1 mm tolerance in raw units).
+    axis_ok = True
+    tol_raw = 0.001 / scale
+    for i, panel in enumerate(solution["panels"]):
+        loop = panel.get("loop_coords") or []
+        for a, b in zip(loop[:-1], loop[1:]):
+            if abs(a[0] - b[0]) > tol_raw and abs(a[1] - b[1]) > tol_raw:
+                axis_ok = False
+                violations.append(f"panel {i} has a diagonal cable segment")
+                break
+    checks["axis_aligned"] = axis_ok
 
     # 5 + 6 + 7: loops and physical validity.
     loops_ok = True
