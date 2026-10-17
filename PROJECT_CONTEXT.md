@@ -13,23 +13,32 @@ every milestone. Keep under ~200 lines.
 - Physical validity is MANDATORY: cables cross rooms ONLY through real doors/open passages;
   never cross walls/windows/exterior.
 
-## 2. Hard Constraints (from PS4)
+## 2. Hard Constraints (OFFICIAL, from docs/"Cable Ring Challenge - Problem Statement4.pptx")
 
-1. One device in EVERY eligible room: living room, bedroom, kitchen, storage room.
-2. Each panel serves max 20 devices AND max 100 m^2 of eligible-room area.
-3. Every eligible room assigned to exactly ONE panel.
-4. Rooms of a panel form a CONTIGUOUS territory (valid indoor passages).
-5. One closed, non-branching loop per panel, every device visited exactly once.
-6. Routes stay inside building; cross between rooms only through verified portals.
-7. Deliverables: visual overlay (CAD blueprint style) + matching JSON + benchmark vs baseline.
+1. One fixed NODE in EVERY eligible room: living, bedroom, kitchen, storage.
+2. Each hub serves max 100 m^2 eligible area AND max 5 nodes (both at once);
+   hubs needed >= max(ceil(area/100), ceil(nodes/5)).
+3. Every eligible room + node assigned to exactly ONE hub; hub's rooms form one
+   connected zone through doors/open passages only.
+4. Ring: H -> N1 -> ... -> Nn -> same H. Closed, non-branching, each node once.
+   Retracing a door is allowed; shared line length counts as overlap (O).
+5. Free space: cable axis-aligned (horizontal/vertical only), inside inner
+   boundary, outside walls/windows, between rooms only through door/open-passage
+   gaps.
+6. Hub point: inside an eligible room it serves, >= 0.5 m from walls.
+7. Scale (slide 4): scale_units_per_m = sqrt(inner.area / plan["area"]);
+   net_area NEVER used (0 in 32% of plans).
+8. Ranking: fewest hubs first, then J = L + 5X + O + 0.5B (slide 6/7, 1 mm
+   tolerance). Tie-break: smaller assigned-area gap between hubs.
 
 ## 3. Dataset Facts (ResPlan)
 
 - `archive.zip` (gitignored) → extracted to `dataset/` (gitignored): ResPlan.pkl (~286MB, ~17k plans).
 - Plan dict: `id`, `graph`, `inner`, `wall`, `door`, `window`, `frontdoor`, room layers, metadata.
 - TRAP: do NOT trust `fallback` edges or blind `adjacency`; `via_window` edges are unverified.
-- TRAP: raw coordinates are NOT metres; area metadata bad on 5,458/17,000 plans.
-- Calibration NOW: door-width based (median door = 0.85 m nominal), area fallback only.
+- TRAP: raw coordinates are NOT metres. OFFICIAL scale (slide 4):
+  `scale = sqrt(inner.area / plan["area"])` units per metre; door-width median
+  is kept only as a printed sanity cross-check; net_area never used.
 
 ## 4. Architecture (unchanged)
 
@@ -47,8 +56,11 @@ per-cluster 2-opt TSP on D, Loop-First/Panel-Snap panel placement.
 | M2 | module2_wall_router_and_matrix.py | DONE (opposite-side door test, door-width calibration, unroutable_rooms report) |
 | M2v | verify_module2.py | DONE (wall erosion 0.02 m, expanded building envelope) |
 | M3 | module3_joint_optimizer.py | DONE: find_partition enforces 100 m2 cap per cluster (component pre-split included); fewest-panels-then-least-cable selection; cost-aware splits (MAX_SPLIT_COST_EVALS=160 cap) with stub-aware cluster cost; baseline last-resort attach only if contiguous+within cap else own panel |
-| M4 | module4_validator_and_blueprint.py | DONE: always exits 0 (verdict is data); validator unchanged |
-| runner | run_pipeline.py | unchanged; batch works, 25/25 complete |
+| M4 | module4_validator_and_blueprint.py | DONE: always exits 0; official checks hub_clearance + axis_aligned; blueprint shows H#/N# badges + red violations |
+| runner | run_pipeline.py | unchanged; batch works |
+| export | export_submission.py | DONE: organisers' slide-8 schema -> submissions/<id>.json, parse-back verified; skips 1448 with evidence note |
+| cost | compute_cost.py | DONE: official J = L + 5X + O + 0.5B from polylines -> submissions/cost_summary.json |
+| gate | check_axis_aligned.py | DONE: 0 diagonal segments across all final/matrix JSONs |
 
 All fixes COMMITTED and PUSHED (see git log). Batch outputs (JSON) committed.
 
@@ -65,20 +77,37 @@ All fixes COMMITTED and PUSHED (see git log). Batch outputs (JSON) committed.
 
 No known open bugs in the pipeline.
 
-## 7. Results (final batch run 2026-10-16, log: batch_run_step5.log)
+## 7. Tier 1 COMPLIANCE RESULTS (2026-10-17, post-official-rules)
 
-- 25/25 plans completed end-to-end; **optimized valid 25/25, baseline valid 25/25**.
-- Optimized cable <= baseline on ALL 25 plans: mean 5.24%, max 16.1% (7607).
-  Best: 4625 +14.8%, 2373 +14.2%, 5616 +13.9%; 14433: 36.9 -> 33.9 m.
-- M3 runtime <= 0.13 s/plan (worst: 2373). M2 dominates runtime.
-- History: old M2/M3 was 16/20 completed, 15/16 optimized valid, mean 6.1%
-  on 14 comparable plans. Gains since: capacity fix (3467), exit-code fix,
-  baseline contiguity/capacity fix (10808, 2373), cost-aware split selection
-  (3467 optimized 44.0 -> 33.5 m, now beats baseline; 2373 34.4 -> 30.6 m).
-- Sealed-room design decision: rooms with no verified portal (`unroutable_rooms`)
-  are excluded from eligible and reported separately, not failed. RATIONALE:
-  dataset gives no physical opening -> unwirable by ANY solution. CAVEAT: soft
-  interpretation of PS4 rule 1 — must be disclosed in final deck/README.
+Compliance commit `0ee8978` (axis-aligned L-routing, official scale, 5-node
+cap, 0.5 m hub clearance + validator checks `hub_clearance`/`axis_aligned`).
+
+- **Axis gate** (`check_axis_aligned.py`): 0 diagonal segments across 50 final
+  JSONs (25 optimized + 25 baseline) + 25 matrices. THE ORIGINAL DQ BUG IS GONE.
+- **Batch**: 24/25 plans valid in BOTH modes. Plan 1448 is OFFICIALLY
+  UNSOLVABLE, not a bug: under the mandated scale its room living_0 = 107.26
+  m^2 > 100 m^2 hub cap, and rule 1 forbids splitting a room across hubs.
+  This is a FEATURE: the validator correctly identifies out-of-benchmark
+  plans (organisers guarantee "no room over 100 m^2" in benchmark plans,
+  slide 2). final_* artifacts kept as evidence; exporter/cost skip it with
+  the same one-line reason.
+- Old vs new (unofficial-scale diagonal routes -> compliant L-routes):
+  14433 cable 33.9 -> 38.8 m, bends 8 -> 25; routes are staircase-shaped -
+  correct per rule 5, longer by construction.
+- **Official cost J** (`compute_cost.py` over 24 submissions, 1 mm tol):
+  mean 93.8, median 92.7, min 64.8 (3796), max 124.0 (2372); total
+  L = 795.8 m, X = 191, O = 164.8 m, B = 670. Full per-plan table:
+  submissions/cost_summary.json.
+- **O == 0 at doors VERIFIED**: across all 137 portals, 0 overlap stretches
+  lie on a portal centreline and 0 pin pairs coincide (min pin separation
+  0.1599 m = the designed 2x8 cm). Door retraces are parallel runs on
+  DIFFERENT lines -> O = 0 per slide 7. The counted O (and X) comes from
+  DIFFERENT legs sharing the same wall-raceway corridors away from doors -
+  legitimate per the metric, and the top optimisation target for Tier 2
+  (ring-wide edge-disjoint routing instead of independent per-leg Dijkstra).
+- X provenance verified (`debug_x.py`): crossing points are genuine
+  perpendicular meetings of different legs away from nodes/hubs, deduped
+  within 1 mm.
 
 ## 8. Environment (this machine)
 
@@ -96,23 +125,12 @@ No known open bugs in the pipeline.
 
 ## 10. Current Next Step
 
-1. Core pipeline is DONE and green (25/25 valid both modes). Do NOT touch M2/M3
-   core logic without re-running the batch.
-2. Judge-facing demo app DONE (`app.py`, single-file Flask, committed):
-   - Run: `python app.py` (auto-opens http://127.0.0.1:8000); `--host 0.0.0.0`
-     prints a LAN URL for judges; `--port`; `--no-browser`.
-   - Upload mode: one JSON-serialized plan dict, no dataset needed
-     (`python app.py --dump <plan_id> plan.json` produces one); plan-id mode
-     via `common.load_plan` when the dataset exists (graceful note otherwise).
-   - Runs M2->M3->M4 in-process (tier-1 report mirrors module2.main() exactly,
-     verified field-by-field vs matrix_14433.json); result page = PASS/FAIL
-     banner, blueprint with visitation badges/legend, baseline comparison,
-     checklist, metrics + % cable gain, NFPA/NEC/24V physics, collapsible JSON
-     + Download button. Pipeline errors -> friendly page, HTTP 200.
-   - Only M4 change: optional `out` param on render_blueprint (BytesIO ok),
-     default behavior unchanged, CLI verified identical.
-   - Tests done: 14433 plan-id PASS w/ badges; fresh plan 2814 upload identical
-     quality; garbage/missing-keys uploads -> friendly error; clean start +
-     browser auto-open confirmed; M4 CLI unchanged.
-3. Remaining: docs website (docs/ static site) — NOT started, awaiting explicit
-   user approval. Final deck polish (PPT in repo root — placeholders).
+1. Tier 1 (official-rules compliance) is DONE: axis-aligned routing, official
+   scale, 5-node cap, hub clearance, exporter, cost metric, gates green.
+2. Tier 2 target (biggest J lever): routes are valid but different legs share
+   the same wall-raceway corridors -> O = 164.8 m and X = 191 over 24 plans.
+   Ring-wide routing (edge-disjoint single cycle per hub, spur-free) or
+   J-aware TSP costs (penalise reused edges) would cut J substantially.
+   This touches M3 routing logic - plan carefully, keep the axis gate green.
+3. Portfolio polish: docs site (awaiting approval), final deck, J table in
+   deck from submissions/cost_summary.json.
