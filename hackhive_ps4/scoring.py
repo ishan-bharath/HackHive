@@ -293,6 +293,10 @@ def main():
                         "artifacts kept as evidence.")}
         ],
     }
+    if args.submission:
+        # single-plan mode: report on stdout, never overwrite the aggregate
+        print(json.dumps(out["plans"][0] if out["plans"] else {}, indent=2))
+        return
     with open("submissions/cost_summary.json", "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=2)
     print("Saved: submissions/cost_summary.json")
