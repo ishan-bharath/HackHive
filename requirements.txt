@@ -5,8 +5,10 @@ matplotlib>=3.8
 flask>=3.1
 Pillow>=10.0
 
-# dev / CI
-pytest>=8.0
-pytest-cov>=5.0
+# dev / CI — exact pins verified green locally (pytest 9.1.1 + pytest-cov 7.1.0
+# + coverage 7.16.2); keeps the runner's resolution identical to local.
+pytest==9.1.1
+pytest-cov==7.1.0
+coverage==7.16.2
 ruff>=0.17
 mypy>=2.4
