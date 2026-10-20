@@ -13,7 +13,7 @@ import argparse
 import json
 
 import numpy as np
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.geometry import LineString, Polygon
 from shapely.ops import unary_union
 
 import common

@@ -96,16 +96,20 @@ def validate(plan, solution, scale):
 
     # 1 + 3: device placement and assignment coverage.
     assigned = {}
+    duplicates = set()
     for i, panel in enumerate(solution["panels"]):
         for rid in panel["assigned_rooms"]:
             if rid in assigned:
+                duplicates.add(rid)
                 violations.append(
                     f"room {rid} assigned to multiple panels {assigned[rid]} and {i}"
                 )
             assigned[rid] = i
     missing = routable_eligible - set(assigned)
     extra = set(assigned) - eligible
-    checks["assignment_complete"] = not missing and not extra
+    checks["assignment_complete"] = not missing and not extra and not duplicates
+    if duplicates:
+        pass  # violations already recorded above
     if missing:
         violations.append(f"eligible rooms never assigned: {sorted(missing)}")
     if extra:

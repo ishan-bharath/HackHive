@@ -2,7 +2,6 @@ import json
 import pickle
 from pathlib import Path
 
-from shapely.geometry import Polygon
 
 DATASET_PATH = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"

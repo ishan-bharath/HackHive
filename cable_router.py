@@ -5,11 +5,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import networkx as nx
 from shapely.geometry import (
-    Point,
     LineString,
     Polygon,
-    MultiPolygon,
-    GeometryCollection,
 )
 
 DATASET_PATH = Path(

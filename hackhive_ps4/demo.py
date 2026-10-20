@@ -28,12 +28,9 @@ import time
 import uuid
 import webbrowser
 
-import networkx as nx
 from flask import Flask, Response, render_template_string, request
-from shapely.geometry import shape
 
 from . import data
-from . import geometry as m2
 from . import optimize as m3
 from . import validate as m4
 from .data import json_to_plan, plan_to_jsonable
@@ -43,7 +40,7 @@ from .render import render_blueprint
 app = Flask(__name__)
 
 # Completed results keyed by token, so the JSON can be downloaded after render.
-RESULTS = {}
+RESULTS: dict[str, str] = {}
 
 REQUIRED_PLAN_KEYS = ("id", "graph", "inner", "wall", "door")
 

@@ -2,9 +2,7 @@ import json
 import pickle
 from pathlib import Path
 
-import networkx as nx
 from shapely.geometry import Point, LineString
-from shapely.ops import unary_union
 
 DATASET_PATH = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"

@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 from shapely.geometry import Point, LineString, Polygon
-from shapely.ops import unary_union
 
 DATASET_PATH = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"

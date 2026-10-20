@@ -166,7 +166,6 @@ def main():
     if global_graph.number_of_nodes() > 0 and eligible_ids:
         comps = list(nx.connected_components(global_graph))
         print(f"Connected components: {len(comps)}")
-        main_comp = max(comps, key=len)
         dev_nodes_all = [(("dev", rid), rid) for rid in eligible_ids]
         anchor = max(
             (nd for nd, _ in dev_nodes_all if nd in global_graph),

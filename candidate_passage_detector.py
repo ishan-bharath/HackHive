@@ -2,7 +2,6 @@ import json
 import pickle
 from pathlib import Path
 
-from shapely.ops import unary_union
 
 
 DATASET_PATH = Path(

@@ -2,7 +2,6 @@ import pickle
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import networkx as nx
 from matplotlib.lines import Line2D
 from shapely.geometry import Polygon, MultiPolygon, GeometryCollection
 

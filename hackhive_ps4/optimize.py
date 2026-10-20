@@ -38,7 +38,6 @@ import time
 
 import numpy as np
 
-from . import config as common
 from . import data
 from . import geometry as m2
 from . import export as ex

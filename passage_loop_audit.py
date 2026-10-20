@@ -2,7 +2,6 @@ import pickle
 from pathlib import Path
 
 import networkx as nx
-from shapely.geometry import Polygon, MultiPolygon
 
 DATASET = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets"

@@ -1,0 +1,33 @@
+[project]
+name = "hackhive-ps4"
+version = "2.0.0"
+description = "Joint hub placement and closed-ring cable routing on ResPlan floor plans (PS4)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+branch = false
+source = ["hackhive_ps4"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["archive", "dataset"]
+
+[tool.ruff.lint]
+# Lenient first pass: real errors only + basic pyflakes; style rules come later.
+select = ["E9", "F", "W"]
+ignore = [
+    "E402",  # module import not at top of file (relocated code keeps its shape)
+]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = false
+no_strict_optional = true
+warn_unused_ignores = false
+exclude = ["archive", "tests", "dataset"]

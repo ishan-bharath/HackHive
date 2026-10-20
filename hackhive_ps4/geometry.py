@@ -20,7 +20,7 @@ from itertools import combinations
 
 import numpy as np
 import networkx as nx
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points, unary_union
 
 from . import config as common
@@ -220,7 +220,6 @@ def _door_opens_between(center, cross, ga, gb, wall_depth_raw):
     """A door connects two rooms only if they lie on OPPOSITE sides of the
     door within a short crossing distance (guards against doors that merely
     come close to both polygons at a corner junction)."""
-    c = Point(center)
     for mult in (0.5, 1.0, 1.5, 2.0, 3.0):
         d = wall_depth_raw * mult
         pa = Point(center[0] + cross[0] * d, center[1] + cross[1] * d)
@@ -548,7 +547,6 @@ def hub_candidates_inset(room, scale, walls_union):
 
 def build_global_graph(plan, rooms, portals, scale):
     wall_depth_raw = (plan.get("wall_depth") or (WALL_CLEARANCE_M / scale * 2))
-    eps_raw = 0.05 / scale
     walls_union = unary_union(parts(plan.get("wall"))) if parts(plan.get("wall")) else None
 
     portals_by_room = {}

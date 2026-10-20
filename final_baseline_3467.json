@@ -7,10 +7,10 @@
     "mode": "baseline",
     "panels": [
       {
-        "panel_room": "living_0",
+        "panel_room": "kitchen_0",
         "panel_position": [
-          186.64,
-          137.787
+          188.067,
+          180.635
         ],
         "assigned_rooms": [
           "kitchen_0",
@@ -18,33 +18,53 @@
         ],
         "assigned_area_m2": 83.12,
         "device_order": [
-          "living_0",
-          "kitchen_0"
+          "kitchen_0",
+          "living_0"
         ],
         "loop_source_indices": [
-          9,
-          0,
+          23,
           1,
-          9
+          0,
+          23
         ],
-        "loop_length_m": 24.986,
-        "loop_bends": 15,
+        "loop_length_m": 26.236,
+        "loop_bends": 12,
         "loop_coords": [
           [
-            186.64,
-            137.79
+            188.07,
+            180.63
           ],
           [
-            192.82,
-            137.79
+            178.5,
+            180.63
           ],
           [
-            192.82,
-            116.04
+            178.5,
+            206.73
+          ],
+          [
+            178.5,
+            173.34
+          ],
+          [
+            179.59,
+            173.34
+          ],
+          [
+            179.59,
+            171.65
+          ],
+          [
+            179.59,
+            170.99
+          ],
+          [
+            203.45,
+            170.99
           ],
           [
             223.77,
-            116.04
+            170.99
           ],
           [
             223.77,
@@ -79,40 +99,12 @@
             173.34
           ],
           [
-            178.5,
-            173.34
-          ],
-          [
-            178.5,
-            206.73
-          ],
-          [
-            178.5,
-            173.34
-          ],
-          [
             179.59,
-            173.34
+            180.63
           ],
           [
-            179.59,
-            171.65
-          ],
-          [
-            179.59,
-            161.0
-          ],
-          [
-            185.79,
-            161.0
-          ],
-          [
-            186.64,
-            161.0
-          ],
-          [
-            186.64,
-            137.79
+            188.07,
+            180.63
           ]
         ],
         "loop_valid": true,
@@ -260,10 +252,10 @@
       ],
       "panel_count": 4,
       "devices_total": 5,
-      "total_cable_length_m": 35.34,
-      "total_bends": 24,
+      "total_cable_length_m": 36.59,
+      "total_bends": 21,
       "all_loops_routed": true,
-      "runtime_s": 0.0
+      "runtime_s": 0.016
     }
   },
   "validation": {
@@ -294,19 +286,14 @@
           "type": "unavoidable (dead-end)"
         }
       ],
-      "nec_bend_violations": [
-        {
-          "panel": 0,
-          "max_bends_between_pulls": 5
-        }
-      ],
+      "nec_bend_violations": [],
       "voltage_drop_24v": [
         {
           "panel": 0,
-          "loop_length_m": 24.986,
-          "loop_resistance_ohm": 0.525,
+          "loop_length_m": 26.236,
+          "loop_resistance_ohm": 0.551,
           "current_a": 0.014,
-          "voltage_drop_v": 0.0073,
+          "voltage_drop_v": 0.0077,
           "within_limit": true
         },
         {

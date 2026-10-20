@@ -1,6 +1,5 @@
 import json
 import pickle
-import heapq
 from pathlib import Path
 from itertools import combinations
 
@@ -11,10 +10,7 @@ from shapely.geometry import (
     Point,
     LineString,
     Polygon,
-    MultiPolygon,
-    GeometryCollection,
 )
-from shapely.ops import unary_union
 
 DATASET_PATH = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"

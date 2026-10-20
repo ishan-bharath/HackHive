@@ -3,7 +3,7 @@ import pickle
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from shapely.geometry import Polygon, MultiPolygon, GeometryCollection
+from shapely.geometry import Polygon
 
 DATASET_PATH = Path(
     r"C:\Users\Amogh\.cache\kagglehub\datasets\resplan"
