@@ -54,7 +54,7 @@ def segments_of_leg(leg):
     return segs
 
 
-def line_key(seg):
+def line_key(seg):  # -> tuple[str, int] | None
     (x1, y1), (x2, y2) = seg
     if abs(y1 - y2) <= TOL:
         return ("h", round(y1 / TOL))
@@ -63,7 +63,7 @@ def line_key(seg):
     return None  # diagonal - invalid input, flagged by the axis gate
 
 
-def merge_intervals(intervals):
+def merge_intervals(intervals: list) -> list:
     """Union of [s, e] intervals (same line)."""
     if not intervals:
         return []
@@ -77,7 +77,7 @@ def merge_intervals(intervals):
     return out
 
 
-def overlap_on_line(intervals):
+def overlap_on_line(intervals: list) -> float:
     """O contribution for one line: sweep with coverage depth k; a stretch
     covered by k legs counts (k-1) times its length."""
     events = []
@@ -95,7 +95,7 @@ def overlap_on_line(intervals):
     return total
 
 
-def perpendicular_crossing(seg_a, seg_b):
+def perpendicular_crossing(seg_a, seg_b):  # -> tuple | None
     """Intersection point of a horizontal and a vertical segment, if any."""
     (ax1, ay1), (ax2, ay2) = seg_a
     (bx1, by1), (bx2, by2) = seg_b
@@ -115,7 +115,7 @@ def perpendicular_crossing(seg_a, seg_b):
     return None
 
 
-def direction_change(a, b, c):
+def direction_change(a, b, c) -> float:
     """Degrees of direction change at vertex b; reversal (180) counts as one
     bend, collinear continuation counts 0."""
     v1 = (b[0] - a[0], b[1] - a[1])
@@ -132,7 +132,7 @@ def direction_change(a, b, c):
 # Metric computation for one submission
 # ------------------------------------------------------------------
 
-def compute_metrics(sub):
+def compute_metrics(sub: dict) -> dict:
     hub_pts = []
     for h in sub["hubs"]:
         hub_pts.append((h["location"]["x"], h["location"]["y"]))
@@ -156,10 +156,10 @@ def compute_metrics(sub):
     # ---- O ----
     # Intervals per (line, leg): a leg covering a stretch counts once, so
     # union its own collinear segments first.
-    per_line = {}
+    per_line: dict = {}
     for hi, h in enumerate(sub["hubs"]):
         for li, leg in enumerate(h["route_segments"]):
-            by_line = {}
+            by_line: dict = {}
             for seg in segments_of_leg(leg):
                 key = line_key(seg)
                 if key is None:
@@ -170,7 +170,7 @@ def compute_metrics(sub):
             for key, ivs in by_line.items():
                 for iv in merge_intervals(ivs):
                     per_line.setdefault(key, []).append(iv)
-    O = sum(overlap_on_line(ivs) for ivs in per_line.values())
+    O = sum((overlap_on_line(ivs) for ivs in per_line.values()), 0.0)
 
     # ---- X ----
     def is_node(pt):
@@ -191,7 +191,7 @@ def compute_metrics(sub):
                 continue
             raw_points.append(pt)
     # Distinct points: cluster within the 1 mm tolerance.
-    pts = []
+    pts: list = []
     for p in sorted(raw_points):
         if not any(math.dist(p, q) <= TOL for q in pts):
             pts.append(p)
@@ -201,7 +201,7 @@ def compute_metrics(sub):
     # Direction changes along each closed ring, hub vertex included.
     B = 0
     for h in sub["hubs"]:
-        ring = []
+        ring: list = []
         for li, leg in enumerate(h["route_segments"]):
             poly = leg["polyline"]
             chunk = poly if li == 0 else poly[1:]

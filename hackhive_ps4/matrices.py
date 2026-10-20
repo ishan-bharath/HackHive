@@ -20,7 +20,7 @@ from .geometry import (build_global_graph, calibrate, count_bends,
 from .render import render
 
 
-def shortest_paths(global_graph, sources):
+def shortest_paths(global_graph, sources) -> dict:
     """Dijkstra from each source; returns dict src -> (dist, paths)."""
     result = {}
     for src in sources:
@@ -29,7 +29,7 @@ def shortest_paths(global_graph, sources):
     return result
 
 
-def build_report(plan, plan_id):
+def build_report(plan: dict, plan_id) -> dict:
     cal = m2.calibrate(plan)
     scale = cal["scale_m_per_raw"]
     rooms = m2.extract_rooms(plan)

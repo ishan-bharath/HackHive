@@ -19,7 +19,8 @@ DOOR_HALF_W = 0.1  # door is 0.2 wide in x (pierces the wall strip)
 DOOR_LEN = 0.8     # door length along the wall (y)
 
 
-def make_row_plan(n_rooms=2, seed=0, room_h=3.0, widths=None):
+def make_row_plan(n_rooms=2, seed=0, room_h=3.0,
+                  widths=None) -> dict:
     """Row plan: n_rooms rooms side by side, one door between each pair.
 
     Scale is 1 raw unit = 1 m by construction (area == inner.area).
@@ -89,7 +90,7 @@ def make_row_plan_jsonable(n_rooms=2, seed=0):
     return plan_to_jsonable(make_row_plan(n_rooms, seed))
 
 
-def run_full(plan):
+def run_full(plan: dict) -> tuple:
     """Run the full pipeline in-process on a plan dict.
 
     Returns (matrix, final_optimized, final_baseline) dicts (validation

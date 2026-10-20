@@ -86,9 +86,6 @@ def write_chart(rows, path):
     comparable = [r for r in ok
                   if r["j_opt"] != "" and r["j_base"] != ""]
     gains = [(1 - r["j_opt"] / r["j_base"]) * 100 for r in comparable]
-    fewer_hubs = sum(1 for r in comparable
-                     if r["hubs"] != "" and r["hubs_base"] != ""
-                     and int(r["hubs"]) < int(r["hubs_base"]))
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle(f"PS4 pipeline benchmark - {len(ok)} plans "

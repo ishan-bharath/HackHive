@@ -82,7 +82,7 @@ def turn_angle(prev, cur, nxt):
     return math.degrees(math.acos(max(-1.0, min(1.0, dot))))
 
 
-def count_bends(coords):
+def count_bends(coords) -> int:
     return sum(
         1
         for i in range(1, len(coords) - 1)
@@ -94,7 +94,7 @@ def count_bends(coords):
 # Calibration
 # ------------------------------------------------------------------
 
-def calibrate(plan):
+def calibrate(plan: dict) -> dict:
     """Official PS4 scale (slide 4): scale_units_per_m = sqrt(inner.area /
     plan['area']), i.e. scale_m_per_raw = 1 / that. The median door width is
     computed only as a printed sanity cross-check. net_area is NEVER used
@@ -147,7 +147,7 @@ def calibrate(plan):
 # Rooms
 # ------------------------------------------------------------------
 
-def extract_rooms(plan):
+def extract_rooms(plan: dict) -> dict:
     rooms = {}
     for node_id, attrs in plan["graph"].nodes(data=True):
         rtype = attrs.get("type", "unknown")
@@ -233,7 +233,7 @@ def _door_opens_between(center, cross, ga, gb, wall_depth_raw):
     return False
 
 
-def find_portals(plan, rooms, scale):
+def find_portals(plan: dict, rooms: dict, scale: float) -> list:
     """Geometry-first portal detection.
 
     Door portals: a door polygon associated with both rooms (room polygons are
@@ -545,11 +545,12 @@ def hub_candidates_inset(room, scale, walls_union):
     return None
 
 
-def build_global_graph(plan, rooms, portals, scale):
+def build_global_graph(plan: dict, rooms: dict, portals: list,
+                        scale: float):
     wall_depth_raw = (plan.get("wall_depth") or (WALL_CLEARANCE_M / scale * 2))
     walls_union = unary_union(parts(plan.get("wall"))) if parts(plan.get("wall")) else None
 
-    portals_by_room = {}
+    portals_by_room: dict = {}
     for i, portal in enumerate(portals):
         portal["id"] = i
         portal["pins"] = {}

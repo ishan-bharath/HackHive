@@ -48,19 +48,30 @@ B (90° bends) between devices + candidate panel wall spots.
 Tier 2 (combinatorics, fast): K_min clusters via BFS region-growing (contiguity guarded),
 per-cluster 2-opt TSP on D, Loop-First/Panel-Snap panel placement.
 
-## 5. Module Map + Status (2026-10-16, after fix round)
+## 5. Module Map + Status (2026-10-20, restructured into hackhive_ps4/)
 
-| Module | File | Status |
+Root-level CLI wrappers kept (run_pipeline.py, module2/3/4_*.py,
+compute_cost.py, export_submission.py, app.py); implementation moved:
+
+| Package module | Content (former file) | Status |
 |---|---|---|
-| M1 | module1_portal_and_calibration.py | DONE (superseded by M2's calibration; diagnostics only) |
-| M2 | module2_wall_router_and_matrix.py | DONE (opposite-side door test, door-width calibration, unroutable_rooms report) |
-| M2v | verify_module2.py | DONE (wall erosion 0.02 m, expanded building envelope) |
-| M3 | module3_joint_optimizer.py | DONE: find_partition enforces 100 m2 cap per cluster (component pre-split included); fewest-panels-then-least-cable selection; cost-aware splits (MAX_SPLIT_COST_EVALS=160 cap) with stub-aware cluster cost; baseline last-resort attach only if contiguous+within cap else own panel |
-| M4 | module4_validator_and_blueprint.py | DONE: always exits 0; official checks hub_clearance + axis_aligned; blueprint shows H#/N# badges + red violations |
-| runner | run_pipeline.py | unchanged; batch works |
-| export | export_submission.py | DONE: organisers' slide-8 schema -> submissions/<id>.json, parse-back verified; skips 1448 with evidence note |
-| cost | compute_cost.py | DONE: official J = L + 5X + O + 0.5B from polylines -> submissions/cost_summary.json |
-| gate | check_axis_aligned.py | DONE: 0 diagonal segments across all final/matrix JSONs |
+| config.py | constants + dataset paths (common.py) | DONE |
+| data.py | dataset loading + plan<->JSON round trip (common/app) | DONE |
+| geometry.py | portals, calibration, axis-aligned routing graph (module2) | DONE |
+| matrices.py | APSP D/B build + module2 CLI (module2 main) | DONE |
+| optimize.py | partitioning + exact/J-aware ring sequencing (module3) | DONE |
+| validate.py | PS4 validator + physics (module4) | DONE; hub_clearance + axis_aligned checks |
+| render.py | blueprint + quick-look PNGs (module2/3/4) | DONE; H#/N# badges + red violations |
+| scoring.py | official J metric (compute_cost.py) | DONE |
+| export.py | submission exporter (export_submission.py) | DONE; hub location = ring start |
+| pipeline.py | batch runner (run_pipeline.py) | DONE |
+| demo.py | Flask demo UI (app.py) | DONE |
+| synthetic.py | synthetic rectilinear plans (tests/CI smoke) | DONE |
+
+Also: benchmark/run_benchmark.py (500-plan multiprocessing harness),
+tests/ (76 tests, 79% coverage), .github/workflows/ci.yml (ruff + mypy +
+pytest + synthetic smoke), archive/ (31 early prototype scripts, git-mv'd).
+Root outputs pruned to one showcase set (14433) + 1448 evidence + submissions/.
 
 All fixes COMMITTED and PUSHED (see git log). Batch outputs (JSON) committed.
 

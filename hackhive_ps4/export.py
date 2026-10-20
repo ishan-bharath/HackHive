@@ -61,7 +61,7 @@ def load_json(path):
         return json.load(f)
 
 
-def pull_points(panel, matrix):
+def pull_points(panel: dict, matrix: dict) -> list:
     """Ordered pull-point positions (raw): hub, N1..Nn, hub again."""
     src = matrix["source_order"]
     node_pos = matrix["node_pos"]
@@ -74,7 +74,7 @@ def pull_points(panel, matrix):
     return pts
 
 
-def split_legs(loop_coords, pulls):
+def split_legs(loop_coords: list, pulls: list) -> list:
     """Cut the stitched loop polyline at the pull points, in order.
     Returns a list of leg polylines (raw units), shared endpoints included."""
     legs = []
@@ -111,9 +111,9 @@ def _hub_location(loop, pulls0, scale):
             "y": round(loop[0][1] * scale, 3)}
 
 
-def export(plan_id, final, matrix):
+def export(plan_id, final: dict, matrix: dict) -> dict:
     scale = final["scale_m_per_raw"]
-    labels = []
+    labels: list = []
 
     def next_label():
         labels.append(f"N{len(labels) + 1}")
@@ -160,7 +160,7 @@ def export(plan_id, final, matrix):
     }
 
 
-def verify(sub):
+def verify(sub: dict) -> bool:
     """Parse-back verification: schema, closed sequences, leg chaining,
     metre-plausible coordinates. Raises AssertionError on any problem."""
     assert sub["units"] == "m"

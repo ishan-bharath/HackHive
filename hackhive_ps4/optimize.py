@@ -226,7 +226,7 @@ def legacy_tour(dev_idx, D):
     return two_opt(tour, D)
 
 
-def solve_loop(cluster, index, D, B=None):
+def solve_loop(cluster, index, D, B=None) -> tuple:
     """Optimal device order (TSP indices) and its closed length.
 
     n <= EXACT_TSP_MAX_NODES (8): EXACT exhaustive search - provably optimal
@@ -293,7 +293,7 @@ def best_panel_for_tour(cluster, report, index, D, B=None, tour=None):
 # Partitioning
 # ------------------------------------------------------------------
 
-def find_partition(areas_m2, eligible, room_graph, loop_cost_fn):
+def find_partition(areas_m2, eligible, room_graph, loop_cost_fn) -> tuple:
     """Try k = k_min, k_min+1 ... (more panels can make a contiguous
     capacity-feasible split possible). A candidate is only accepted when it
     is contiguous AND every cluster fits the panel area cap; Selection order: fewest panels that satisfy the constraints (k ascending),
@@ -545,7 +545,7 @@ def build_panel_record(panel_si, loop, report, D, B, cluster, areas_m2):
     }
 
 
-def ring_local_j(panel_rec, report, scale):
+def ring_local_j(panel_rec: dict, report: dict, scale: float) -> float:
     """Official local cost J = L + 5X + O + 0.5B for ONE candidate ring,
     evaluated on its actual stitched geometry. REUSES compute_cost.py's
     metric implementation (single-hub pseudo-submission, legs split at the
@@ -603,14 +603,14 @@ def summarize(solution):
 # Baseline mode (naive panel-first)
 # ------------------------------------------------------------------
 
-def baseline_solution(plan, report, scale):
+def baseline_solution(plan: dict, report: dict, scale: float) -> dict:
     rooms, portals, room_graph, areas_m2, eligible, unroutable = derive_structures(
         plan, report, scale
     )
     index, D, B = build_index_and_matrices(report)
 
     # Candidate lookup: per room, candidate source indices + positions.
-    cand_by_room = {}
+    cand_by_room: dict = {}
     for si, src in enumerate(report["source_order"]):
         if str(src[0]).startswith("cand"):
             cand_by_room.setdefault(src[-1], []).append(
@@ -719,7 +719,7 @@ def baseline_solution(plan, report, scale):
 # Optimized mode (loop-first, panel-snap)
 # ------------------------------------------------------------------
 
-def optimized_solution(plan, report, scale):
+def optimized_solution(plan: dict, report: dict, scale: float) -> dict:
     rooms, portals, room_graph, areas_m2, eligible, unroutable = derive_structures(
         plan, report, scale
     )

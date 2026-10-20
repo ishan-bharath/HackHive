@@ -14,11 +14,11 @@ from .config import DATASET_PKL
 _PLAN_CACHE = None
 
 
-def dataset_available():
+def dataset_available() -> bool:
     return DATASET_PKL.is_file()
 
 
-def load_plan(plan_id):
+def load_plan(plan_id) -> dict:
     """Load a single plan (dict) by string id. Caches the full pickle in memory."""
     global _PLAN_CACHE
     if _PLAN_CACHE is None:
@@ -36,7 +36,7 @@ def load_plan(plan_id):
     raise ValueError(f"Plan {plan_id} not found in dataset.")
 
 
-def plan_ids(limit=None):
+def plan_ids(limit=None) -> list:
     global _PLAN_CACHE
     if _PLAN_CACHE is None:
         load_plan("0")  # forces cache load
@@ -55,7 +55,7 @@ def _geojson_or_none(geom):
     return None if geom is None else mapping(geom)
 
 
-def plan_to_jsonable(plan):
+def plan_to_jsonable(plan: dict) -> dict:
     """Serialize a ResPlan plan dict (nx graph + shapely geoms) to plain JSON."""
     g = plan["graph"]
     nodes = {}
@@ -81,7 +81,7 @@ def plan_to_jsonable(plan):
     return out
 
 
-def json_to_plan(data):
+def json_to_plan(data: dict) -> dict:
     """Rebuild a pipeline-ready plan dict from a JSON-serialized plan."""
     if not isinstance(data, dict):
         raise ValueError("JSON must be a single object (one plan dict), "

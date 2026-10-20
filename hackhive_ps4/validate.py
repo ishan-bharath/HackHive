@@ -64,7 +64,7 @@ def segment_room_transitions(coords, rooms):
     return seq
 
 
-def validate(plan, solution, scale):
+def validate(plan: dict, solution: dict, scale: float) -> dict:
     rooms = m2.extract_rooms(plan)
     portals = m2.find_portals(plan, rooms, scale)
     walls = unary_union(m2.parts(plan.get("wall")))
@@ -85,7 +85,7 @@ def validate(plan, solution, scale):
     building = unary_union([inner, room_union, portal_union]).buffer(eps) \
         if inner is not None else unary_union([room_union, portal_union]).buffer(eps)
 
-    room_graph = {}
+    room_graph: dict = {}
     for portal in portals:
         a, b = portal["rooms"]
         room_graph.setdefault(a, set()).add(b)
@@ -95,7 +95,7 @@ def validate(plan, solution, scale):
     violations = []
 
     # 1 + 3: device placement and assignment coverage.
-    assigned = {}
+    assigned: dict = {}
     duplicates = set()
     for i, panel in enumerate(solution["panels"]):
         for rid in panel["assigned_rooms"]:
@@ -256,7 +256,7 @@ def validate(plan, solution, scale):
                 )
 
         # Portal usage / pinch points.
-        portal_use = {}
+        portal_use: dict = {}
         for p in portals:
             pair = tuple(sorted(p["rooms"]))
             portal_use.setdefault(pair, 0)

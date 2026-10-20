@@ -175,7 +175,7 @@
       "room_id": "bedroom_0",
       "location": {
         "x": 13.106,
-        "y": 6.566
+        "y": 6.565
       },
       "assigned_rooms": [
         "bedroom_0"
@@ -192,15 +192,15 @@
         {
           "from": "H2",
           "to": "N4",
-          "length_m": 1.973,
+          "length_m": 1.972,
           "polyline": [
             [
               13.106,
-              6.566
+              6.565
             ],
             [
               14.409,
-              6.566
+              6.565
             ],
             [
               14.409,
@@ -211,7 +211,7 @@
         {
           "from": "N4",
           "to": "H2",
-          "length_m": 1.973,
+          "length_m": 1.972,
           "polyline": [
             [
               14.409,
@@ -219,20 +219,20 @@
             ],
             [
               14.409,
-              6.566
+              6.565
             ],
             [
               13.106,
-              6.566
+              6.565
             ]
           ]
         }
       ],
-      "ring_length_m": 3.946
+      "ring_length_m": 3.944
     }
   ],
   "reported_metrics": {
     "hub_count": 2,
-    "total_length_m": 27.768
+    "total_length_m": 27.766
   }
 }

@@ -30,7 +30,7 @@
         {
           "from": "H1",
           "to": "N1",
-          "length_m": 7.363,
+          "length_m": 7.362,
           "polyline": [
             [
               6.724,
@@ -188,7 +188,7 @@
           ]
         }
       ],
-      "ring_length_m": 34.646
+      "ring_length_m": 34.645
     },
     {
       "hub_id": "H2",
@@ -253,6 +253,6 @@
   ],
   "reported_metrics": {
     "hub_count": 2,
-    "total_length_m": 38.956
+    "total_length_m": 38.955
   }
 }

@@ -182,7 +182,7 @@
       "hub_id": "H2",
       "room_id": "bedroom_1",
       "location": {
-        "x": 13.22,
+        "x": 13.219,
         "y": 12.339
       },
       "assigned_rooms": [
@@ -203,7 +203,7 @@
           "length_m": 1.831,
           "polyline": [
             [
-              13.22,
+              13.219,
               12.339
             ],
             [
@@ -230,7 +230,7 @@
               12.339
             ],
             [
-              13.22,
+              13.219,
               12.339
             ]
           ]
@@ -260,7 +260,7 @@
         {
           "from": "H3",
           "to": "N5",
-          "length_m": 1.954,
+          "length_m": 1.953,
           "polyline": [
             [
               14.721,
@@ -279,7 +279,7 @@
         {
           "from": "N5",
           "to": "H3",
-          "length_m": 1.954,
+          "length_m": 1.953,
           "polyline": [
             [
               15.137,
@@ -296,11 +296,11 @@
           ]
         }
       ],
-      "ring_length_m": 3.908
+      "ring_length_m": 3.906
     }
   ],
   "reported_metrics": {
     "hub_count": 3,
-    "total_length_m": 35.761
+    "total_length_m": 35.759
   }
 }

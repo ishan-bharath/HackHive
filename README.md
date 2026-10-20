@@ -10,6 +10,31 @@ max 5 nodes / 100 m² per hub, contiguous territories, one closed
 non-branching ring per hub, axis-aligned cable only through verified
 doors/open passages.
 
+## Package layout
+Implementation lives in the `hackhive_ps4/` package; the root-level scripts
+(`run_pipeline.py`, `module2/3/4_*.py`, `compute_cost.py`,
+`export_submission.py`, `app.py`) are thin backwards-compatible CLI wrappers.
+
+| Module | What it does |
+|---|---|
+| `hackhive_ps4/config.py` | Constants + dataset paths (former common.py) |
+| `hackhive_ps4/data.py` | Dataset loading, plan dict <-> JSON round trip |
+| `hackhive_ps4/geometry.py` | Portal verification, scale calibration, axis-aligned routing graph |
+| `hackhive_ps4/matrices.py` | APSP D/B matrix build (Tier 1) + module2 CLI |
+| `hackhive_ps4/optimize.py` | Partitioning + exact/J-aware ring sequencing (Tier 2) |
+| `hackhive_ps4/validate.py` | Independent PS4-rule validator + Honeywell physics |
+| `hackhive_ps4/render.py` | Blueprint + quick-look PNGs |
+| `hackhive_ps4/scoring.py` | Official cost J = L + 5X + O + 0.5B |
+| `hackhive_ps4/export.py` | Organisers' submission-schema exporter |
+| `hackhive_ps4/pipeline.py` | Batch runner |
+| `hackhive_ps4/demo.py` | Flask demo UI |
+| `hackhive_ps4/synthetic.py` | Synthetic rectilinear plans for tests/CI |
+
+Quality gates: `pytest` (76 tests, 79% coverage), `ruff`, `mypy`, CI workflow
+in `.github/workflows/ci.yml` (lint + types + tests + 3-plan synthetic smoke).
+Benchmark harness: `benchmark/run_benchmark.py` (500-plan multiprocessing run,
+results in `benchmark/`). Early prototype scripts live in `archive/`.
+
 ## Pipeline
 | Module | File | What it does |
 |---|---|---|
