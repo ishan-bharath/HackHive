@@ -17,10 +17,10 @@
       ],
       "hub_id": "H1",
       "location": {
-        "x": 3.989,
-        "y": 1.589
+        "x": 3.99,
+        "y": 1.59
       },
-      "ring_length_m": 9.438,
+      "ring_length_m": 9.44,
       "room_id": "room_0",
       "route_segments": [
         {
@@ -28,12 +28,12 @@
           "length_m": 3.06,
           "polyline": [
             [
-              3.989,
-              1.589
+              3.99,
+              1.59
             ],
             [
               4.64,
-              1.589
+              1.59
             ],
             [
               4.64,
@@ -83,7 +83,7 @@
         },
         {
           "from": "N2",
-          "length_m": 1.748,
+          "length_m": 1.75,
           "polyline": [
             [
               2.34,
@@ -95,11 +95,11 @@
             ],
             [
               2.34,
-              1.589
+              1.59
             ],
             [
-              3.989,
-              1.589
+              3.99,
+              1.59
             ]
           ],
           "to": "H1"
@@ -110,7 +110,7 @@
   "plan_id": "synthetic_2_0",
   "reported_metrics": {
     "hub_count": 1,
-    "total_length_m": 9.438
+    "total_length_m": 9.44
   },
   "units": "m"
 }

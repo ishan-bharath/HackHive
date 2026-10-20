@@ -1,0 +1,27 @@
+{
+  "plans_total": 500,
+  "ok": 500,
+  "success_rate_pct": 100.0,
+  "valid_optimized": 474,
+  "valid_baseline": 474,
+  "valid_both": 472,
+  "runtime_median_s": 2.55,
+  "runtime_mean_s": 2.94,
+  "runtime_max_s": 13.36,
+  "hub_histogram": {
+    "1": 256,
+    "2": 117,
+    "3": 86,
+    "4": 33,
+    "5": 5,
+    "6": 3
+  },
+  "j_gain_mean_pct": 10.8,
+  "j_gain_median_pct": 10.35,
+  "j_opt_wins": 390,
+  "j_ties": 13,
+  "j_losses": 69,
+  "j_losses_with_fewer_hubs": 2,
+  "error_histogram": {},
+  "wall_time_s": 307.5
+}

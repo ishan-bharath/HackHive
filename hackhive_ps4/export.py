@@ -99,28 +99,16 @@ def leg_length_m(polyline, scale):
     return sum(math.dist(a, b) for a, b in zip(polyline[:-1], polyline[1:])) * scale
 
 
-def _reanchor_hub(loop, hub_pos):
-    """Re-anchor the closed ring's endpoints at the hub's exact node
-    position while KEEPING every segment axis-aligned: the vertex adjacent
-    to each endpoint is re-aligned to the hub coordinate along the leg's
-    own axis. Rounding drift (loop_coords are 2-decimal, node_pos 3-decimal)
-    can exceed the 1 mm reporting tolerance at coarse scales, so both ends
-    of the ring are snapped."""
-    if math.dist(loop[0], hub_pos) > TOL_RAW:
-        return  # genuinely detached from the hub -> let split_legs raise
-    dx, dy = abs(loop[1][0] - loop[0][0]), abs(loop[1][1] - loop[0][1])
-    loop[0] = list(hub_pos)
-    if dx >= dy:
-        loop[1][1] = hub_pos[1]
-    else:
-        loop[1][0] = hub_pos[0]
-    if len(loop) > 2:
-        dx, dy = abs(loop[-1][0] - loop[-2][0]), abs(loop[-1][1] - loop[-2][1])
-        loop[-1] = list(hub_pos)
-        if dx >= dy:
-            loop[-2][1] = hub_pos[1]
-        else:
-            loop[-2][0] = hub_pos[0]
+def _hub_location(loop, pulls0, scale):
+    """Hub location for the submission: the ring's own start point.
+
+    loop_coords are rounded to 2 decimals (node_pos to 3); snapping the
+    location to the raw node position would break axis alignment of the
+    first leg at coarse scales, so the reported location IS the ring start
+    (within 5 mm raw = 0.4 mm at typical dataset scales of the true node).
+    """
+    return {"x": round(loop[0][0] * scale, 3),
+            "y": round(loop[0][1] * scale, 3)}
 
 
 def export(plan_id, final, matrix):
@@ -137,7 +125,6 @@ def export(plan_id, final, matrix):
         node_ids = [next_label() for _ in panel["device_order"]]
         pulls = pull_points(panel, matrix)
         loop = [[c[0], c[1]] for c in panel["loop_coords"]]
-        _reanchor_hub(loop, pulls[0])
         legs = split_legs(loop, pulls)
         seq_labels = [hub_id] + node_ids + [hub_id]
 
@@ -154,10 +141,7 @@ def export(plan_id, final, matrix):
         hubs.append({
             "hub_id": hub_id,
             "room_id": panel["panel_room"],
-            "location": {
-                "x": round(pulls[0][0] * scale, 3),
-                "y": round(pulls[0][1] * scale, 3),
-            },
+            "location": _hub_location(loop, pulls[0], scale),
             "assigned_rooms": list(panel["assigned_rooms"]),
             "assigned_nodes": node_ids,
             "closed_sequence": seq_labels,
