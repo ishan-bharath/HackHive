@@ -18,13 +18,13 @@
         ],
         "assigned_area_m2": 86.22,
         "device_order": [
-          "living_0",
-          "kitchen_0"
+          "kitchen_0",
+          "living_0"
         ],
         "loop_source_indices": [
           19,
-          0,
           1,
+          0,
           19
         ],
         "loop_length_m": 12.435,
@@ -35,16 +35,8 @@
             87.91
           ],
           [
-            191.02,
+            155.77,
             87.91
-          ],
-          [
-            191.02,
-            96.92
-          ],
-          [
-            191.02,
-            83.18
           ],
           [
             155.77,
@@ -75,7 +67,15 @@
             83.18
           ],
           [
-            155.77,
+            191.02,
+            83.18
+          ],
+          [
+            191.02,
+            96.92
+          ],
+          [
+            191.02,
             87.91
           ],
           [
@@ -187,7 +187,7 @@
       "total_cable_length_m": 18.991,
       "total_bends": 16,
       "all_loops_routed": true,
-      "runtime_s": 0.016
+      "runtime_s": 0.0
     }
   },
   "validation": {

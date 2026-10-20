@@ -6,11 +6,20 @@ Consumes the module 2 matrix report. Two modes:
   baseline   - naive panel-first: greedy geometric clustering, panel at the
                device room closest to the cluster centroid, loop ordered by
                nearest-neighbour on straight-line device distances.
-  optimized  - contiguous BFS region-growing partition + local boundary swaps,
-               per-cluster TSP (nearest neighbour + 2-opt) on true indoor
-               distances D, then Loop-First/Panel-Snap: the panel snaps to the
-               candidate position whose insertion into the best tour edge adds
-               the least cable.
+optimized  - contiguous BFS region-growing partition + local boundary swaps,
+                 per-cluster DUAL-CANDIDATE ring sequencing with J-aware
+                 selection: candidate A = EXACT order (exhaustive permutation
+                 search, provably length-optimal; the official 5-node hub cap
+                 keeps n <= 5, headroom to 8), candidate B = legacy
+                 nearest-neighbour + 2-opt order; both are snapped to a panel
+                 (Loop-First/Panel-Snap) and evaluated on the OFFICIAL local
+                 cost J = L + 5X + O + 0.5B of their actual ring geometry
+                 (reusing compute_cost.py's metric), lower J wins, exact
+                 order preferred on ties. Honest limitation: selection-time J
+                 covers only WITHIN-ring crossings/overlap; inter-ring terms
+                 are plan-wide and computed afterwards by compute_cost.py.
+                 Partitioning costs still use the legacy tour so partition
+                 decisions are identical to the pre-exact implementation.
 
 Hard constraints enforced: panel capacity (100 m^2, 5 nodes), contiguous
 territories (on the verified portal room graph), every eligible room assigned
@@ -41,6 +50,8 @@ PANEL_DEVICE_CAP = 5
 TSP_IMPROVE_PASSES = 60
 
 MAX_SPLIT_COST_EVALS = 160
+
+EXACT_TSP_MAX_NODES = 8
 
 
 # ------------------------------------------------------------------
@@ -183,22 +194,64 @@ def loop_len_idx(tour, D):
     return total
 
 
-def solve_loop(cluster, index, D):
-    """Optimal-ish device order (TSP indices) and its closed length."""
+def exact_tour(dev_idx, D, B=None):
+    """EXACT optimal ring order by exhaustive permutation search.
+
+    The official PS caps each hub at 5 nodes, so n <= 5 in practice
+    (5! = 120 candidates); headroom to EXACT_TSP_MAX_NODES = 8 (8! = 40320,
+    still trivial). Cost per permutation = closed loop length on D. Ties are
+    broken by (a) fewer total bends via the B matrix (per-segment bend sums),
+    (b) lexicographically smaller permutation, for determinism."""
+    best_len = math.inf
+    tied = []
+    for perm in itertools.permutations(dev_idx):
+        ln = loop_len_idx(perm, D)
+        if ln < best_len - 1e-9:
+            best_len = ln
+            tied = [perm]
+        elif ln <= best_len + 1e-9:
+            tied.append(perm)
+    if B is not None:
+        tied.sort(key=lambda p: (
+            sum(int(B[p[i], p[(i + 1) % len(p)]]) for i in range(len(p))), p))
+    else:
+        tied.sort()
+    return list(tied[0]), best_len
+
+
+def legacy_tour(dev_idx, D):
+    """Legacy heuristic candidate generator (kept from the pre-exact
+    implementation): nearest-neighbour start + 2-opt improvement."""
+    tour = nn_tour_indexed(dev_idx, D)
+    return two_opt(tour, D)
+
+
+def solve_loop(cluster, index, D, B=None):
+    """Optimal device order (TSP indices) and its closed length.
+
+    n <= EXACT_TSP_MAX_NODES (8): EXACT exhaustive search - provably optimal
+    ring sequencing (the official 5-node hub cap keeps n <= 5 in practice).
+    n > 8: legacy nearest-neighbour + 2-opt heuristic, kept unchanged as a
+    defensive fallback (not expected to trigger while the node cap holds)."""
     dev_idx = [index[("dev", rid)] for rid in sorted(cluster)]
     if not dev_idx:
         return [], 0.0
     if len(dev_idx) == 1:
         return dev_idx, 0.0
+    if len(dev_idx) <= EXACT_TSP_MAX_NODES:
+        return exact_tour(dev_idx, D, B)
     tour = nn_tour_indexed(dev_idx, D)
     tour = two_opt(tour, D)
     return tour, loop_len_idx(tour, D)
 
 
-def best_panel_for_tour(cluster, report, index, D):
+def best_panel_for_tour(cluster, report, index, D, B=None, tour=None):
     """Loop-first panel snap: candidate whose insertion into the best tour
-    edge adds the least cable."""
-    tour, _ = solve_loop(cluster, index, D)
+    edge adds the least cable. tour=None -> exact solve_loop order; callers
+    may pass an explicit candidate tour (e.g. the legacy 2-opt order) and the
+    same snap logic is applied to it."""
+    if tour is None:
+        tour, _ = solve_loop(cluster, index, D, B)
     if not tour:
         return None, 0.0, []
 
@@ -492,6 +545,49 @@ def build_panel_record(panel_si, loop, report, D, B, cluster, areas_m2):
     }
 
 
+def ring_local_j(panel_rec, report, scale):
+    """Official local cost J = L + 5X + O + 0.5B for ONE candidate ring,
+    evaluated on its actual stitched geometry. REUSES compute_cost.py's
+    metric implementation (single-hub pseudo-submission, legs split at the
+    pull points exactly like export_submission.py) - no divergent second
+    implementation.
+
+    HONEST LIMITATION: selection-time X and O cover only WITHIN-ring
+    interactions of this candidate; inter-ring crossings/overlap are
+    plan-wide terms and are computed afterwards by compute_cost.py on the
+    finished plan."""
+    import compute_cost as cc
+    import export_submission as ex
+    try:
+        pulls = ex.pull_points(panel_rec, report)
+        loop = [[c[0], c[1]] for c in panel_rec["loop_coords"]]
+        legs_raw = ex.split_legs(loop, pulls)
+    except (KeyError, ValueError):
+        return math.inf
+    hub = pulls[0]
+    legs_m = [[[round(x * scale, 3), round(y * scale, 3)] for x, y in leg]
+              for leg in legs_raw]
+    pseudo = {
+        "plan_id": "local", "units": "m",
+        "hubs": [{
+            "hub_id": "H1", "room_id": "",
+            "location": {"x": round(hub[0] * scale, 3),
+                         "y": round(hub[1] * scale, 3)},
+            "assigned_rooms": [], "assigned_nodes": [],
+            "closed_sequence": [],
+            "route_segments": [
+                {"from": "L%d" % i, "to": "L%d" % (i + 1), "length_m": 0.0,
+                 "polyline": leg} for i, leg in enumerate(legs_m)],
+            "ring_length_m": 0.0,
+        }],
+        "reported_metrics": {"hub_count": 1, "total_length_m": 0.0},
+    }
+    try:
+        return cc.compute_metrics(pseudo)["J"]
+    except ValueError:
+        return math.inf
+
+
 def summarize(solution):
     m = solution["metrics"]
     m["panel_count"] = len(solution["panels"])
@@ -633,13 +729,19 @@ def optimized_solution(plan, report, scale):
     k, total_area, n_comp = min_panels(areas_m2, eligible, room_graph)
 
     def loop_cost_fn(cluster):
-        _, ln = solve_loop(cluster, index, D)
-        return ln
+        # Legacy tour cost: keeps partition decisions bit-identical to the
+        # pre-exact implementation (ring ORDER is chosen J-aware later).
+        dev_idx = [index[("dev", r)] for r in sorted(cluster)]
+        tour = legacy_tour(dev_idx, D)
+        return loop_len_idx(tour, D)
 
     def cluster_cost_fn(cluster):
         # Full metric: device loop + cheapest panel insertion, matching what
-        # the final solution is measured on.
-        si, cost, _ = best_panel_for_tour(cluster, report, index, D)
+        # the final solution is measured on. Uses the legacy tour order so
+        # partition decisions are identical to the pre-exact implementation.
+        dev_idx = [index[("dev", r)] for r in sorted(cluster)]
+        si, cost, _ = best_panel_for_tour(
+            cluster, report, index, D, B, tour=legacy_tour(dev_idx, D))
         return cost if si is not None else loop_cost_fn(cluster)
 
     clusters, k_used, k_min, capacity_relaxed = find_partition(
@@ -651,14 +753,38 @@ def optimized_solution(plan, report, scale):
 
     panels = []
     for cluster in clusters:
-        panel_si, cost, loop = best_panel_for_tour(cluster, report, index, D)
-        if panel_si is None:
+        # Dual-candidate ring sequencing, J-aware selection:
+        #   A: exact exhaustive order (provably length-optimal)
+        #   B: legacy nn + 2-opt order
+        # Both get the same Loop-First/Panel-Snap treatment; the winner is
+        # the lower official local J (within-ring terms), exact wins ties.
+        dev_idx = [index[("dev", r)] for r in sorted(cluster)]
+        candidates = [("exact", solve_loop(cluster, index, D, B)[0])]
+        if 1 < len(dev_idx) <= EXACT_TSP_MAX_NODES:
+            legacy = list(legacy_tour(dev_idx, D))
+            if legacy != list(candidates[0][1]):
+                candidates.append(("legacy", legacy))
+        best_rec, best_j = None, math.inf
+        for cand_name, tour in candidates:
+            panel_si, _, loop = best_panel_for_tour(
+                cluster, report, index, D, B, tour=tour)
+            if panel_si is None:
+                continue
+            rec = build_panel_record(panel_si, loop, report, D, B,
+                                     cluster, areas_m2)
+            j = ring_local_j(rec, report, scale) if rec["loop_valid"] \
+                else math.inf
+            if best_rec is None or j < best_j - 1e-9:
+                best_rec, best_j = rec, j
+        if best_rec is None:
             # Fallback: panel in the largest room's device node.
             rid = max(cluster, key=lambda r: areas_m2[r])
             panel_si = index[("dev", rid)]
-            dev_idx = [index[("dev", r)] for r in sorted(cluster) if r != rid]
-            loop = [panel_si] + dev_idx + [panel_si]
-        rec = build_panel_record(panel_si, loop, report, D, B, cluster, areas_m2)
+            dev_rest = [index[("dev", r)] for r in sorted(cluster) if r != rid]
+            loop = [panel_si] + dev_rest + [panel_si]
+            best_rec = build_panel_record(panel_si, loop, report, D, B,
+                                          cluster, areas_m2)
+        rec = best_rec
         over = sum(areas_m2[r] for r in cluster) - PANEL_AREA_CAP_M2
         rec["capacity_violation_m2"] = round(over, 2) if over > 1e-9 else 0.0
         panels.append(rec)

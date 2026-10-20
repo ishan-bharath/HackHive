@@ -15,7 +15,7 @@ doors/open passages.
 |---|---|---|
 | M1 | `module1_portal_and_calibration.py` | Portal graph + calibration diagnostics |
 | M2 | `module2_wall_router_and_matrix.py` | Verified portals, wall-hugging router, APSP D/B matrices (true indoor metres + bend counts) |
-| M3 | `module3_joint_optimizer.py` | Contiguous partitioning, 2-opt TSP rings, Loop-First/Panel-Snap; baseline vs optimized |
+| M3 | `module3_joint_optimizer.py` | Contiguous partitioning, exact + J-aware ring sequencing, Loop-First/Panel-Snap; baseline vs optimized |
 | M4 | `module4_validator_and_blueprint.py` | Independent validator, NFPA/NEC physics, CAD-style blueprint + final JSON |
 | —  | `run_pipeline.py` | Full chain + benchmark per plan (`--plan-id all --limit 25` for batch) |
 | —  | `export_submission.py` | Converts final JSONs to the organisers' submission schema (`submissions/<id>.json`) |

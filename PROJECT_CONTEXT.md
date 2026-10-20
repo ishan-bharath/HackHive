@@ -125,12 +125,33 @@ cap, 0.5 m hub clearance + validator checks `hub_clearance`/`axis_aligned`).
 
 ## 10. Current Next Step
 
-1. Tier 1 (official-rules compliance) is DONE: axis-aligned routing, official
-   scale, 5-node cap, hub clearance, exporter, cost metric, gates green.
-2. Tier 2 target (biggest J lever): routes are valid but different legs share
-   the same wall-raceway corridors -> O = 164.8 m and X = 191 over 24 plans.
-   Ring-wide routing (edge-disjoint single cycle per hub, spur-free) or
-   J-aware TSP costs (penalise reused edges) would cut J substantially.
-   This touches M3 routing logic - plan carefully, keep the axis gate green.
-3. Portfolio polish: docs site (awaiting approval), final deck, J table in
-   deck from submissions/cost_summary.json.
+1. Tier 1 (official-rules compliance) DONE. Tier 2-lite (exact ring
+   sequencing) DONE — see §7b.
+2. Tier 3 target (biggest remaining J lever): O = 158.9 m and X = 183 come
+   from different legs sharing the same wall-raceway corridors away from
+   doors (per-ring selection is within-ring J-aware only; inter-ring terms
+   are plan-wide). Ring-wide edge-disjoint routing or J-aware partitioning
+   would cut J further. Touches M3 routing - keep the axis gate green.
+3. Portfolio polish: docs site (awaiting approval), final deck (J table from
+   submissions/cost_summary.json).
+
+## 7b. Tier 2-lite: exact ring sequencing + J-aware selection (2026-10-20)
+
+- Exact TSP (exhaustive permutations, <= 8 nodes, official cap keeps n <= 5)
+  revealed: LENGTH-optimality != COST-optimality. Pure exact-L ordering with
+  a bend-proxy tie-break made 7/24 plans WORSE under official J (X costs 5
+  each; the tie-break was blind to O/X), e.g. 7607 91 -> 115, worst 14926
+  +29.1. dL was 0.000 everywhere: 2-opt was already length-optimal on all 24.
+- FIX: dual-candidate generation per cluster - candidate A = exact-L order,
+  candidate B = legacy nn+2-opt order; identical Loop-First/Panel-Snap for
+  both; winner = lower official local J of the actual ring geometry, computed
+  by REUSING compute_cost.py's metric on a single-hub pseudo-submission
+  (within-ring X/O only - inter-ring terms are plan-wide, computed afterwards
+  by compute_cost.py). Exact order preferred on ties. Partition costs still
+  use the legacy tour (partition decisions bit-identical to pre-exact).
+- RESULT vs pre-Tier-2 baseline (all 24 plans J <= old, none worse):
+  6 improved, 18 unchanged, total dJ = -53.3:
+  13342 -18.5 (121.2 -> 102.7), 5616 -13.5 (75.9 -> 62.4),
+  6296 -8.5, 13572 -6.3, 624783 -4.2, 2372 -2.3.
+  L unchanged everywhere (795.8 m total); gains came from fewer crossings
+  (X 191 -> 183) and less same-line overlap (O 164.8 -> 158.9 m).
