@@ -21,6 +21,10 @@ archive.zip
 *.csv
 *.log
 
+# Committed documentation assets and benchmark data (exceptions above)
+!docs/assets/*.png
+!benchmark/results.csv
+
 # Secrets
 .env
 .env.*
