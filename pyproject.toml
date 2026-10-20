@@ -15,7 +15,24 @@ source = ["hackhive_ps4"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-exclude = ["archive", "dataset"]
+exclude = [
+    "archive",
+    "dataset",
+    # legacy prototype/diagnostic scripts (moved to archive/ in the cleanup pass)
+    "audit_multiple_plans.py", "audit_passages.py", "cable_router.py",
+    "calibrate_areas.py", "candidate_passage_detector.py",
+    "connector_association.py", "connector_edge_reconciliation.py",
+    "debug_x.py", "diagnose_areas.py", "diagnose_portals.py",
+    "inspect_doorway_geometry.py", "inspect_opening_boundaries.py",
+    "module1_portal_and_calibration.py", "obstacle_router.py",
+    "passage_constrained_router.py", "passage_geometry_audit.py",
+    "passage_loop_audit.py", "passage_validator.py",
+    "portal_cable_router.py", "portal_extractor.py",
+    "portal_geometry_test.py", "portal_route_planner.py",
+    "verify_module2.py", "visual_passage_review.py",
+    "visualize_door_candidates.py", "visualize_kitchen_gap.py",
+    "visualize_passages.py",
+]
 
 [tool.ruff.lint]
 # Lenient first pass: real errors only + basic pyflakes; style rules come later.
